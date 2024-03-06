@@ -6,5 +6,8 @@ export default defineNuxtConfig({
     // editorSupport: true,
   },
   pages: true,
-  modules: ['@nuxtjs/tailwindcss'],
+  modules: ['@nuxt/ui'],
+  ui: {
+    global: true,
+  },
 })
