@@ -15,10 +15,12 @@
     "sourceType": "module"
   },
   "plugins": ["@typescript-eslint", "vue"],
-  "rules": {},
+  "rules": {
+    "no-undef": "off"
+  },
   "overrides": [
     {
-      "files": ["pages/**/*.vue"],
+      "files": ["pages/**/*.vue","layouts/**/*.vue"],
       "rules": {
         "vue/multi-word-component-names": 0
       }
