@@ -10,35 +10,25 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   const login = async (userData: UserLogin) => {
-    try {
-      start()
-      const { data } = await useAPI('/auth/login', {
-        method: 'POST',
-        body: userData,
-      })
-      user.value = data.value
+    start()
+    const { data } = await useAPI('/auth/login', {
+      method: 'POST',
+      body: userData,
+    })
+    user.value = data.value
 
-      await navigateTo('/')
-    } catch (error) {
-      console.log('fetch error', error)
-    } finally {
-      finish()
-    }
+    await navigateTo('/')
+    finish()
   }
 
   const signOut = async () => {
-    try {
-      start()
-      sessionStorage.removeItem('refreshToken')
-      sessionStorage.removeItem('rftExpireDate')
-      sessionStorage.removeItem('token')
-      user.value = null
-      await navigateTo('/auth/login')
-    } catch (error) {
-      console.log(error)
-    } finally {
-      finish()
-    }
+    start()
+    sessionStorage.removeItem('refreshToken')
+    sessionStorage.removeItem('rftExpireDate')
+    sessionStorage.removeItem('token')
+    user.value = null
+    await navigateTo('/auth/login')
+    finish()
   }
   return {
     isAuthenticated,

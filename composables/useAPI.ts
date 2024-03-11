@@ -53,9 +53,10 @@ export const useAPI = <T = unknown>(
           new Date(Date.now()).getTime()
         if (!refreshToken || isRftExpired <= 0) {
           this.retry = 0
-          return createError('RefreshToken expired or do not have')
+
+          return createError('Failed while authenticate')
         }
-        await useFetch('/auth/refresh-token', {
+        return await useFetch('/auth/refresh-token', {
           baseURL: `${config.public.baseUrl}`,
           method: 'POST',
           server: false,
