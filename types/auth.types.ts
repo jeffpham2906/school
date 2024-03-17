@@ -22,7 +22,20 @@ export interface UserData {
   updateAt: string
   id: string
 }
+interface TokenData {
+  token: string
+  expires: string
+  payload: {
+    userId: string
+    username: string
+    type: string
+  }
+}
 
-export interface User {
+export interface UserAndTokenResponse {
   user: UserData
+  tokens: {
+    access: TokenData
+    refresh: TokenData
+  }
 }

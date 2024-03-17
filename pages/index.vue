@@ -1,7 +1,6 @@
 <template>
-  <div class="p-20">
+  <div class="">
     <UButton>HomePage</UButton>
-    <UButton to="/user">UserPage</UButton>
     <UButton @click="signOut">Sign Out</UButton>
   </div>
 </template>

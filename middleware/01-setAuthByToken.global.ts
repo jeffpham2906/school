@@ -5,6 +5,8 @@ export default defineNuxtRouteMiddleware(async () => {
   if (authState.isAuthenticated) {
     return
   }
-  const { data } = await useAPI('/auth/user-info')
-  authState.setUser(data.value || null)
+  const { data } = await useAPI<{ data: { value: unknown | null } }>(
+    '/v2/auth/user-info'
+  )
+  authState.setUser(data.value?.data || null)
 })

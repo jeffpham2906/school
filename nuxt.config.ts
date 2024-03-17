@@ -8,9 +8,11 @@ export default defineNuxtConfig({
       autoprefixer: {},
     },
   },
+
   colorMode: {
     preference: 'light',
   },
+
   pages: true,
   modules: ['@nuxt/ui', '@pinia/nuxt'],
   alias: {
@@ -24,7 +26,7 @@ export default defineNuxtConfig({
   },
   runtimeConfig: {
     public: {
-      baseUrl: 'https://api-school-mng-dev.vais.vn/api/v2',
+      baseUrl: 'https://api-school-mng-dev.vais.vn/api',
     },
   },
   vite: {

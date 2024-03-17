@@ -7,6 +7,7 @@
       class="space-y-4 p-4"
       @submit="onSubmit"
       @error="onError"
+      ref="form"
     >
       <UFormGroup label="Username" name="username" required>
         <UInput v-model="state.username" />
@@ -34,7 +35,7 @@
 <script setup lang="ts">
 import type { FormErrorEvent, FormSubmitEvent } from '#ui/types'
 import * as yup from 'yup'
-import type { UserLogin } from '~/types'
+import type { UserAndTokenResponse, UserLogin } from '~/types'
 definePageMeta({
   layout: 'auth-layout',
 })
@@ -43,7 +44,7 @@ const state = reactive<UserLogin>({
   username: '',
   password: '',
 })
-
+const form = ref()
 const userLoginSchema = yup.object({
   username: yup
     .string()
@@ -56,10 +57,42 @@ const userLoginSchema = yup.object({
 })
 const authState = useAuthStore()
 const loading = ref(false)
-
-const onSubmit = (event: FormSubmitEvent<UserLogin>) => {
+const config = useRuntimeConfig()
+const onSubmit = async (event: FormSubmitEvent<UserLogin>) => {
   loading.value = true
-  authState.login(event.data).finally(() => (loading.value = false))
+  form.value.clear()
+  const { data } = await $fetch<{ data: UserAndTokenResponse }>(
+    `${config.public.baseUrl}/v2/auth/login`,
+    {
+      method: 'POST',
+      body: event.data,
+      onResponseError({ response }) {
+        form.value.setErrors([
+          { message: response._data?.message, path: 'username' },
+        ])
+      },
+    }
+  ).finally(() => (loading.value = false))
+  const user = data.user
+  const token = data.tokens.access.token
+  const refreshToken = data.tokens.refresh.token
+  const exp = data.tokens.refresh.expires
+  if (user && token && refreshToken && exp) {
+    authState.setUser(user)
+    sessionStorage.setItem('token', token)
+    sessionStorage.setItem('refreshToken', refreshToken)
+    sessionStorage.setItem('rftExpireDate', exp)
+    return await navigateTo('/')
+  } else {
+    useToast().add({
+      title: 'Lỗi không tìm được data user',
+      icon: 'i-heroicons-x-circle',
+      color: 'red',
+      timeout: 3000,
+    })
+  }
+  state.password = ''
+  state.username = ''
 }
 
 const onError = async (event: FormErrorEvent) => {

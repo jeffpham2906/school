@@ -1,14 +1,36 @@
 <template>
-  <div v-if="loadingAuth">Loading...</div>
-  <div v-else>
-    <h1>Default layout</h1>
-    <slot />
+  <div>
+    <div class="h-screen grid grid-rows-[auto,1fr] grid-cols-[auto,1fr]">
+      <div class="row-start-1 row-end-3 px-6 py-3 border-r">
+        <h1 class="text-center font-semibold px-4 py-2 mb-6">Logo</h1>
+        <NavBar />
+      </div>
+      <div
+        class="flex flex-row-reverse px-4 py-3 items-center gap-2.5 border-b"
+      >
+        <UIcon
+          name="i-heroicons-arrow-left-on-rectangle"
+          class="w-6 h-6 rotate-180"
+        />
+        <UIcon name="i-heroicons-user" class="w-6 h-6" />
+        <UFormGroup>
+          <template #label>
+            <div class="flex items-center gap-1">
+              <UAvatar
+                src="https://dev-minio.vais.vn/asahi-e-school-mng/public/avataaars.png"
+                alt="avater"
+                size="sm"
+              />
+              <span>{{ authState.user?.record?.username || '' }}</span>
+            </div>
+          </template>
+        </UFormGroup>
+      </div>
+      <div class=""><slot /></div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-const loadingAuth = ref(true)
-onMounted(() => {
-  loadingAuth.value = false
-})
+const authState = useAuthStore()
 </script>

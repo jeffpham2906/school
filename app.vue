@@ -1,8 +1,8 @@
 <template>
-  <NuxtLayout>
-    <NuxtLoadingIndicator />
-
-    <NuxtPage> </NuxtPage>
+  <NuxtLayout
+    ><NuxtLoadingIndicator />
+    <NuxtPage />
+    <UNotifications />
   </NuxtLayout>
 </template>
 <script setup lang="ts">

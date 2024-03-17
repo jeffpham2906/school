@@ -1,6 +1,5 @@
 <template>
-  <div v-if="loadingAuth">Loading...</div>
-  <div v-else class="flex items-center justify-center h-screen bg-gray-100">
+  <div class="flex items-center justify-center h-screen bg-gray-100">
     <div
       class="bg-white rounded-md w-full max-w-80 shadow-sm p-6 text-gray-700"
     >
