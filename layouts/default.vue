@@ -26,7 +26,7 @@
           </template>
         </UFormGroup>
       </div>
-      <div class=""><slot /></div>
+      <div><slot /></div>
     </div>
   </div>
 </template>

@@ -58,6 +58,7 @@ const userLoginSchema = yup.object({
 const authState = useAuthStore()
 const loading = ref(false)
 const config = useRuntimeConfig()
+const { setTokenAuth } = useTokens()
 const onSubmit = async (event: FormSubmitEvent<UserLogin>) => {
   loading.value = true
   form.value.clear()
@@ -76,12 +77,10 @@ const onSubmit = async (event: FormSubmitEvent<UserLogin>) => {
   const user = data.user
   const token = data.tokens.access.token
   const refreshToken = data.tokens.refresh.token
-  const exp = data.tokens.refresh.expires
-  if (user && token && refreshToken && exp) {
+  const refreshTokenExpire = data.tokens.refresh.expires
+  if (user && token && refreshToken && refreshTokenExpire) {
     authState.setUser(user)
-    sessionStorage.setItem('token', token)
-    sessionStorage.setItem('refreshToken', refreshToken)
-    sessionStorage.setItem('rftExpireDate', exp)
+    setTokenAuth(token, refreshToken, refreshTokenExpire)
     return await navigateTo('/')
   } else {
     useToast().add({

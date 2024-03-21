@@ -1,11 +1,13 @@
-import type { AllStudents } from '~/types/student.types'
-
-interface GetAllStudentsProps {
-  limit: number
+export interface GetAllStudentsProps {
+  limit?: number
+  page?: number
+  'filter[gender]'?: string | null
+  // 'filter[type]'?: string | null
+  // 'filter[status]'?: string | null
 }
-export const getAllStudents = (queries: ComputedRef<GetAllStudentsProps>) => {
-  return useAPI('/students', {
+export const getAllStudents = (queries?: ComputedRef<GetAllStudentsProps>) => {
+  return useAPI(() => '/students', {
     query: queries,
-    watch: [queries],
+    watch: queries ? [queries] : false,
   })
 }

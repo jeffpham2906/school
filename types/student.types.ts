@@ -1,19 +1,32 @@
 export interface Student {
-  studentCode: string
+  avatar: {
+    key: string
+    bucket: string
+    url: string
+  }
   name: string
+  studentCode: string
+  pastClassIds: string[]
+  nationality: string
+  slug: string
   gender: string
+  healthInsuranceNumber: string
+  identityNumber: string
+  permanentResidence: string
+  currentAddress: string
+  note: string
+  status: string
+  type: string
+  currentClassId: string
   dateOfBirth: string
-  class: string
-}
-
-export interface AllStudents {
-  items: Student[]
-  total: number
-  totalPages: number
-  page: number
-  limit: number
-}
-
-export interface ResponeStudents {
-  data: AllStudents
+  parents: [
+    {
+      parentId: string
+      type: string
+      _id: string
+    },
+  ]
+  createdAt: string
+  updatedAt: string
+  id: string
 }

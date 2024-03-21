@@ -20,7 +20,7 @@
   },
   "overrides": [
     {
-      "files": ["pages/**/*.vue","layouts/**/*.vue"],
+      "files": ["pages/**/*.vue", "layouts/**/*.vue", "component/**/*.vue"],
       "rules": {
         "vue/multi-word-component-names": 0
       }

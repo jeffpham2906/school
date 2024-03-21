@@ -13,7 +13,6 @@ export default defineNuxtConfig({
     preference: 'light',
   },
 
-  pages: true,
   modules: ['@nuxt/ui', '@pinia/nuxt'],
   alias: {
     pinia: '/node_modules/@pinia/nuxt/node_modules/pinia/dist/pinia.mjs',

@@ -15,8 +15,8 @@
           <UFormGroup label="Tên" name="name" required>
             <UInput v-model="state.name" />
           </UFormGroup>
-          <UFormGroup label="Mã giáo viên" name="teacherCode" required>
-            <UInput v-model="state.teacherCode" />
+          <UFormGroup label="Ảnh" name="avatar">
+            <UInput type="file" v-model="state.avatar" />
           </UFormGroup>
         </div>
         <div class="grid grid-cols-2 gap-3.5 mb-3.5">
@@ -51,7 +51,7 @@
           </UFormGroup>
         </div>
         <div class="grid grid-cols-2 gap-3.5 mb-3.5">
-          <UFormGroup label="Số bảo hiểm" name="healthInsuranceNumber" required
+          <UFormGroup label="Số bảo hiểm" name="healthInsuranceNumber"
             ><UInput v-model="state.healthInsuranceNumber"
           /></UFormGroup>
           <UFormGroup label="Số CMND/CCCD" name="identityNumber" required
@@ -109,7 +109,7 @@
 <script setup lang="ts">
 import * as yup from 'yup'
 import { format } from 'date-fns'
-import type { Gender, Status, Teacher } from '~/types/teacher.types'
+import type { Gender, Status, Teacher, Type } from '~/types/teacher.types'
 import type { FormErrorEvent, FormSubmitEvent } from '#ui/types'
 import { createTeacher } from '~/services/teachers'
 import type { AsyncData } from '#app'
@@ -120,7 +120,11 @@ const props = defineProps({
 
 const isOpen = defineModel()
 const form = ref()
-
+// const onChangeFile = (e: Event) => {
+//   const [_file] = (e.target as HTMLInputElement).files as FileList
+//   state.avatar = _file
+//   console.log(state.avatar)
+// }
 const genderOptions = [
   {
     value: 'male',
@@ -146,13 +150,13 @@ const typeOptions = [
     label: 'Hợp đồng',
   },
   {
-    value: 'partime',
+    value: 'parttime',
     label: 'Tạm thời',
   },
 ]
 const initialState: Teacher = {
   name: '',
-  teacherCode: '',
+  avatar: undefined,
   email: '',
   phone: '',
   dateOfBirth: new Date(),
@@ -167,6 +171,7 @@ const initialState: Teacher = {
   type: 'official',
 }
 const state = reactive(initialState)
+
 const phoneRegex =
   /^((\+[1-9]{1,4}[ -]?)|(\([0-9]{2,3}\)[ -]?)|([0-9]{2,4})[ -]?)*?[0-9]{3,4}[ -]?[0-9]{3,4}$/
 //Schema validation
@@ -176,11 +181,7 @@ const teacherSchema = yup.object({
     .required('Vui lòng nhập tên')
     .min(6, 'Tối thiểu 6 ký tự')
     .max(30, 'Tối đa là 30 ký tự'),
-  teacherCode: yup
-    .string()
-    .required('Vui lòng nhập mã giáo viên')
-    .min(6, 'Tối thiểu là 6 ký tự')
-    .max(20, 'Tối đa là 20 ký tự'),
+  avatar: yup.mixed(),
   email: yup
     .string()
     .required('Vui lòng nhập email')
@@ -191,12 +192,8 @@ const teacherSchema = yup.object({
     .required('Vui lòng nhập SĐT'),
   dateOfBirth: yup.date().default(() => new Date()),
   gender: yup.string<Gender>(),
-  nationality: yup.string().required('Vui lòng nhập quốc tịch'),
-  healthInsuranceNumber: yup
-    .string()
-    .required('Vui lòng nhập sổ bảo hiểm')
-    .min(6, 'Tối thiểu 6 ký tự')
-    .max(20, 'Tối đa là 20 ký tự'),
+  nationality: yup.string(),
+  healthInsuranceNumber: yup.string(),
   identityNumber: yup
     .string()
     .required('Vui lòng nhập CMT/CCCD')
@@ -212,11 +209,12 @@ const teacherSchema = yup.object({
     .max(20, 'Tối đa là 20 ký tự'),
   note: yup.string(),
   status: yup.string<Status>(),
-  type: yup.string(),
+  type: yup.string<Type>().required('Vui lòng nhập loại'),
 })
 
 const onSubmit = async (event: FormSubmitEvent<Teacher>) => {
   form.value.clear()
+  console.log(event.data)
   const { data, error } = (await createTeacher(event.data)) as AsyncData<
     { data: object },
     { data: { error: { issues: { path: string; message: string }[] } } }

@@ -7,6 +7,7 @@ export const useAPI = async <T = unknown>(
   url: string | (() => string),
   userOptions: FetchOptions<T> = {}
 ) => {
+  const { getToken, getRefreshToken } = useTokens()
   const config = useRuntimeConfig()
   const abortController = new AbortController()
   const timeoutId = setTimeout(() => {
@@ -27,7 +28,7 @@ export const useAPI = async <T = unknown>(
     server: false,
 
     onRequest({ options }) {
-      const token = sessionStorage.getItem('token')
+      const token = getToken()
 
       if (token) {
         options.headers = {
@@ -38,29 +39,31 @@ export const useAPI = async <T = unknown>(
         }
       }
     },
-    onResponse() {},
+    onResponse({ response }) {
+      const hasError =
+        !response.status.toString().startsWith('2') || response._data.error
+      if (hasError) {
+        throw createError({
+          statusCode: response.status,
+          message:
+            response._data?.message || JSON.stringify(response._data.error),
+        })
+      }
+    },
 
     async onResponseError({ response }) {
       const statusCode = response.status || 500
-      const statusMessage = response._data?.message
       const errorsMsg: unknown[] = response._data?.error?.issues
-      // // const message = errorsMsg.map((err) => {
-      // //   return ``
-      // // })
+
       if (statusCode === 401) {
-        const refreshToken = sessionStorage.getItem('refreshToken')
-        const refreshTokenExpireIn = sessionStorage.getItem('rftExpireDate')
-        const isRftExpired =
-          new Date(refreshTokenExpireIn || 0).getTime() -
-          new Date(Date.now()).getTime()
-        if (!refreshToken || isRftExpired <= 0) {
+        const { isExpired, token } = getRefreshToken()
+        if (!token || isExpired) {
           this.retry = 0
-          throw createError('Failed while authenticate')
+          return createError('Token is expired')
         }
-        return await refreshTokenAPI(refreshToken)
+        return await refreshTokenAPI()
       }
-      console.log(response)
-      createError({ statusCode, data: errorsMsg })
+      throw createError({ statusCode, data: errorsMsg })
     },
   }
 

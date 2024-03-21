@@ -4,12 +4,13 @@ interface Image {
   url: string
 }
 export type Gender = 'male' | 'female' | 'other'
-export type Type = 'official' | 'contract' | 'partime'
+export type Type = 'official' | 'contract' | 'parttime'
 export type Status = 'active' | 'inactive'
 export interface Teacher {
   name: string
-  teacherCode: string
-  avatar?: Image
+
+  teacherCode?: string
+  avatar?: File | undefined
   contract?: Image
   email: string
   phone: string
@@ -23,12 +24,4 @@ export interface Teacher {
   note?: string
   status: Status
   type?: Type
-}
-
-export interface TeacherData {
-  items: Teacher[]
-  limit: number
-  page: number
-  total: number
-  totalPages: number
 }

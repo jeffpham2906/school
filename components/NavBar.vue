@@ -21,14 +21,14 @@ const links: Link[] = [
     to: '/',
   },
   {
-    label: 'Student',
+    label: 'Students',
     icon: 'i-heroicons-academic-cap',
-    to: '/student',
+    to: '/students',
   },
   {
-    label: 'Teacher',
+    label: 'Teachers',
     icon: 'i-heroicons-user-group',
-    to: '/teacher',
+    to: '/teachers',
   },
 ]
 </script>
