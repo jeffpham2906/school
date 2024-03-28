@@ -40,7 +40,6 @@
         :trailing="true"
         @click="isOpen = true"
       />
-      <CreateStudentModel v-model="isOpen" :refreshData="refresh" />
     </div>
     <UTable :columns="columns" :rows="dataTable" :loading="pending || loading">
       <template #actions-data="">
@@ -75,6 +74,10 @@ import type { AsyncData } from '#app'
 import { getAllStudents, type GetAllStudentsProps } from '~/services/students'
 import type { GetResponseData } from '~/types'
 import type { Student } from '~/types/student.types'
+
+definePageMeta({
+  layout: 'applayout',
+})
 
 const router = useRouter()
 const route = useRoute()

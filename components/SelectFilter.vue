@@ -1,37 +1,41 @@
 <template>
-  <USelect
-    v-model="labelSelected"
-    :options="labelOptions"
-    :ui="{ base: 'capitalize' }"
-    :size="size"
-  />
+  <USelect v-model="labelSelected" :options="options" :size="size" />
 </template>
 
 <script setup lang="ts">
+import type { LocationQueryValue } from 'vue-router'
+
+interface Options {
+  label: string
+  value: string | number
+}
 const props = defineProps<{
-  labelOptions: string[] | number[]
+  options: Options[]
   size?: string
-  labelFilter?: string
+  labelFilter: string
 }>()
 
-const key = props.labelFilter || `filter[${props.labelOptions[0]}]`
+const key = props.labelFilter
 
 const route = useRoute()
 const { setRoute } = useQuery()
-const labelSelected = ref(route.query[key] ?? props.labelOptions[0])
+
+const labelSelected = ref<Options | string | number | LocationQueryValue[]>(
+  route.query[key] ?? props.options[0].value
+)
 
 watch(labelSelected, () => {
   const obj = new Map()
   obj.set(key, labelSelected.value)
-
-  setRoute(Object.fromEntries(obj.entries()), '' + props.labelOptions[0])
+  setRoute(Object.fromEntries(obj.entries()), '' + props.options[0].value)
 })
 
 watch(
-  () => route.query,
+  () => route.query[key],
   () => {
-    const newValue = route.query[key] ?? props.labelOptions[0]
-    labelSelected.value = newValue
+    if (route.query[key] === undefined) {
+      labelSelected.value = String(props.options[0].value)
+    }
   }
 )
 </script>

@@ -1,13 +1,13 @@
 import type { UseFetchOptions } from '#app'
 import defu from 'defu'
-import { refreshTokenAPI } from '~/utils/refreshTokenAPI'
 type FetchOptions<T> = UseFetchOptions<T> & { timeout?: number }
 
 export const useAPI = async <T = unknown>(
   url: string | (() => string),
   userOptions: FetchOptions<T> = {}
 ) => {
-  const { getToken, getRefreshToken } = useTokens()
+  const { start, finish } = useLoadingIndicator()
+  const { token, refresh } = useAuth()
   const config = useRuntimeConfig()
   const abortController = new AbortController()
   const timeoutId = setTimeout(() => {
@@ -26,51 +26,64 @@ export const useAPI = async <T = unknown>(
     retryStatusCodes: [401],
     key: typeof url === 'string' ? url : url(),
     server: false,
-
     onRequest({ options }) {
-      const token = getToken()
-
-      if (token) {
+      if (token.value) {
         options.headers = {
           ...options.headers,
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${token.value}`,
           Accept: 'application/json',
           'Content-type': 'application/json',
         }
       }
     },
-    onResponse({ response }) {
+    async onResponse({ response }) {
       const hasError =
-        !response.status.toString().startsWith('2') || response._data.error
+        !response.ok || response.status.toString().startsWith('4')
       if (hasError) {
-        throw createError({
-          statusCode: response.status,
-          message:
-            response._data?.message || JSON.stringify(response._data.error),
-        })
+        // if (response.status === 401) {
+        //   return await refresh()
+        // } else {
+        //   throw createError({
+        //     statusCode: response.status,
+        //     message:
+        //       response._data?.message || JSON.stringify(response._data.error),
+        //   })
+        // }
       }
     },
 
     async onResponseError({ response }) {
-      const statusCode = response.status || 500
-      const errorsMsg: unknown[] = response._data?.error?.issues
-
-      if (statusCode === 401) {
-        const { isExpired, token } = getRefreshToken()
-        if (!token || isExpired) {
+      if (response.status === 401) {
+        const { error } = await refresh()
+        if (error.value) {
           this.retry = 0
-          return createError('Token is expired')
         }
-        return await refreshTokenAPI()
       }
-      throw createError({ statusCode, data: errorsMsg })
+      // const statusCode = response.status || 500
+      // const statusMessage = response || ''
+      // const errorsMsg = (response._data || {}) as ErrorTypes
+
+      // const errorEntries = Object.entries(errorsMsg.errors)
+
+      // const message = errorEntries.reduce((acc: string[], [key, value]) => {
+      //   return [...acc, ...value.map((item) => `${key} ${item}`)]
+      // }, [])
+
+      // throw createError({
+      //   statusCode,
+      //   statusMessage,
+      //   message: message.join(ERROR_SEPARATOR),
+      // })
     },
   }
 
   const options = defu(userOptions, defaultOptions)
-  return useFetch(url, options).finally(() => {
-    if (timeoutId) {
-      clearTimeout(timeoutId)
-    }
-  })
+  start()
+  return useFetch(url, options)
+    .finally(() => {
+      if (timeoutId) {
+        clearTimeout(timeoutId)
+      }
+    })
+    .finally(() => finish())
 }

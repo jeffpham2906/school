@@ -9,5 +9,6 @@ export const getAllStudents = (queries?: ComputedRef<GetAllStudentsProps>) => {
   return useAPI(() => '/students', {
     query: queries,
     watch: queries ? [queries] : false,
+    timeout: 7000,
   })
 }

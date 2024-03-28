@@ -8,18 +8,14 @@ export default defineNuxtConfig({
       autoprefixer: {},
     },
   },
-
+  imports: {
+    dirs: ['./stores', './services'],
+  },
   colorMode: {
     preference: 'light',
   },
+  modules: ['@nuxt/ui'],
 
-  modules: ['@nuxt/ui', '@pinia/nuxt'],
-  alias: {
-    pinia: '/node_modules/@pinia/nuxt/node_modules/pinia/dist/pinia.mjs',
-  },
-  pinia: {
-    storesDirs: ['./stores/**.ts'],
-  },
   ui: {
     global: true,
   },

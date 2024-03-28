@@ -13,18 +13,39 @@
       @onLeftClick="handleDeleteTeacher"
       :loading="isLoading"
     />
-    <CreateTeacherModal v-model="isOpen" :refreshData="refresh" />
+    <TeacherModel v-if="isOpen" v-model="isOpen" :refresh-fc="refresh" />
     <template #header>
       <HeaderPage>Giáo viên</HeaderPage>
     </template>
     <div class="flex items-center justify-between px-4 py-3">
       <div class="flex gap-2">
         <SeachBar v-model="searchQuery" />
-        <SelectFilter :label-options="['gender', 'male', 'female', 'other']" />
         <SelectFilter
-          :label-options="['type', 'official', 'contract', 'parttime']"
+          :options="[
+            { label: 'Giới tính', value: 'gender' },
+            { label: 'Nam', value: 'male' },
+            { label: 'Nữ', value: 'female' },
+            { label: 'Khác', value: 'other' },
+          ]"
+          label-filter="filter[gender]"
         />
-        <SelectFilter :label-options="['status', 'active', 'disabled']" />
+        <SelectFilter
+          :options="[
+            { label: 'Loại', value: 'type' },
+            { label: 'Chính thức', value: 'official' },
+            { label: 'Hợp đồng', value: 'contract' },
+            { label: 'Parttime', value: 'parttime' },
+          ]"
+          label-filter="filter[type]"
+        />
+        <SelectFilter
+          :options="[
+            { label: 'Trạng thái', value: 'status' },
+            { label: 'Active', value: 'active' },
+            { label: 'Disabled', value: 'disabled' },
+          ]"
+          label-filter="filter[status]"
+        />
         <USelect :options="sortOptions" />
         <UButton
           label="Reset"
@@ -48,17 +69,6 @@
       :rows="dataTable"
       :loading="pending || isLoading"
     >
-      <template #teacherCode-data="{ row }">
-        <span
-          :class="[
-            searchQuery !== '' &&
-              row.slug.includes(stringToSlug(searchQuery)) &&
-              'text-green-600',
-          ]"
-        >
-          {{ row.teacherCode }}
-        </span>
-      </template>
       <template #name-data="{ row }">
         <span
           :class="[
@@ -127,7 +137,11 @@
         <span class="flex items-center gap-1.5 text-sm"
           >Rows per page :
           <SelectFilter
-            :label-options="[10, 20, 50]"
+            :options="[
+              { label: '10', value: '10' },
+              { label: '20', value: '20' },
+              { label: '50', value: '50' },
+            ]"
             label-filter="limit"
             size="xs"
         /></span>
@@ -138,23 +152,26 @@
 
 <script setup lang="ts">
 import type { AsyncData } from '#app'
-import CreateTeacherModal from '~/components/CreateTeacherModal.vue'
 import { useQuery } from '~/composables/useQuery'
 import { deleteTeacher, getAllTeachers } from '~/services/teachers'
 import type { GetResponseData } from '~/types'
 import type { Teacher } from '~/types/teacher.types'
 
+definePageMeta({
+  layout: 'applayout',
+})
+
 const route = useRoute()
-const toast = useToast()
-const isLoading = ref(false)
 const isOpen = ref(false)
+
 const isPopupOpen = ref(false)
 const searchQuery = ref('')
 const deleteId = ref('')
 
+const isLoading = ref(false)
 const { queries, setRoute } = useQuery()
-
 const page = ref(Number(route.query?.page) || 1)
+
 watch(page, () => {
   setRoute({ page: page.value })
 })
@@ -167,40 +184,38 @@ const sortOptions = [
 // const sort = ref()
 
 // Fetch Data
-const { data, pending, refresh } = (await getAllTeachers(queries)) as AsyncData<
+const { data, refresh, pending } = (await getAllTeachers(queries)) as AsyncData<
   { data: GetResponseData<Teacher> },
   unknown
 >
 const handleDeleteTeacher = async () => {
   isLoading.value = true
-  const { error } = await deleteTeacher(deleteId.value)
-  if (error.value) {
-    return toast.add({
-      title: error.value.message,
-      icon: 'i-heroicons-x-circle',
-      color: 'red',
-      timeout: 2500,
-    })
-  }
-  refresh()
-    .then(() =>
-      toast.add({
-        title: 'Xoá thành công',
-        timeout: 2500,
-        icon: 'i-heroicons-check-circle',
-      })
-    )
+  await deleteTeacher(deleteId.value)
+    .then(() => refresh())
     .finally(() => {
       deleteId.value = ''
-      isLoading.value = false
       isPopupOpen.value = false
+      isLoading.value = false
     })
+}
+
+const handleActionClick = (action: string, id: string) => {
+  switch (action) {
+    case 'detail':
+      route.params.id = id
+      return (isOpen.value = true)
+    case 'delete':
+      deleteId.value = id
+      return (isPopupOpen.value = true)
+    default:
+      return
+  }
 }
 const dataTable = computed(() => data.value?.data.items || [])
 const totalPages = computed(() => data.value?.data.totalPages || 1)
 const totalResults = computed(() => data.value?.data.total || 0)
 const pageFrom = computed(
-  () => (page.value - 1) * (Number(route.query.limit) || 10) + 1 || ''
+  () => (page.value - 1) * (Number(route.query.limit) || 10) + 1 || 0
 )
 const pageTo = computed(
   () =>
@@ -260,15 +275,4 @@ const actionsData = [
     },
   ],
 ]
-const handleActionClick = (action: string, id: string) => {
-  switch (action) {
-    case 'detail':
-      return navigateTo(`${route.path}/${id}`)
-    case 'delete':
-      deleteId.value = id
-      return (isPopupOpen.value = true)
-    default:
-      return
-  }
-}
 </script>

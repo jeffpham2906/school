@@ -1,7 +1,7 @@
 <template>
   <UModal v-model="isOpen" :ui="{ width: 'w-fit' }">
     <div class="flex flex-col justify-center items-center p-8 gap-6">
-      <p>Bạn chắc chắn xoá người dùng chứ?</p>
+      <slot name="message">Bạn có chắc chắn xoá người dùng chứ?</slot>
       <div class="flex gap-6">
         <UButton
           label="Có"

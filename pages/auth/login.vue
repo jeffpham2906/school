@@ -18,7 +18,6 @@
       <UButton
         type="submit"
         class="w-32 flex items-center justify-center mx-auto !mt-10"
-        :loading="loading"
         >Login</UButton
       >
       <UButton
@@ -35,16 +34,11 @@
 <script setup lang="ts">
 import type { FormErrorEvent, FormSubmitEvent } from '#ui/types'
 import * as yup from 'yup'
-import type { UserAndTokenResponse, UserLogin } from '~/types'
+import type { UserLogin } from '~/types'
+
 definePageMeta({
   layout: 'auth-layout',
 })
-
-const state = reactive<UserLogin>({
-  username: '',
-  password: '',
-})
-const form = ref()
 const userLoginSchema = yup.object({
   username: yup
     .string()
@@ -55,43 +49,17 @@ const userLoginSchema = yup.object({
     .required('Password is required')
     .min(6, 'Password at least 6 character'),
 })
-const authState = useAuthStore()
-const loading = ref(false)
-const config = useRuntimeConfig()
-const { setTokenAuth } = useTokens()
+const state = reactive<UserLogin>({
+  username: '',
+  password: '',
+})
+const form = ref()
+const { signIn, status } = useAuth()
+// const isLoading = computed(() => status.value === 'loading')
 const onSubmit = async (event: FormSubmitEvent<UserLogin>) => {
-  loading.value = true
-  form.value.clear()
-  const { data } = await $fetch<{ data: UserAndTokenResponse }>(
-    `${config.public.baseUrl}/v2/auth/login`,
-    {
-      method: 'POST',
-      body: event.data,
-      onResponseError({ response }) {
-        form.value.setErrors([
-          { message: response._data?.message, path: 'username' },
-        ])
-      },
-    }
-  ).finally(() => (loading.value = false))
-  const user = data.user
-  const token = data.tokens.access.token
-  const refreshToken = data.tokens.refresh.token
-  const refreshTokenExpire = data.tokens.refresh.expires
-  if (user && token && refreshToken && refreshTokenExpire) {
-    authState.setUser(user)
-    setTokenAuth(token, refreshToken, refreshTokenExpire)
-    return await navigateTo('/')
-  } else {
-    useToast().add({
-      title: 'Lỗi không tìm được data user',
-      icon: 'i-heroicons-x-circle',
-      color: 'red',
-      timeout: 3000,
-    })
-  }
-  state.password = ''
-  state.username = ''
+  await signIn(event.data).catch((err) =>
+    form.value.setErrors([{ message: err.data?.message, path: 'username' }])
+  )
 }
 
 const onError = async (event: FormErrorEvent) => {
@@ -99,4 +67,16 @@ const onError = async (event: FormErrorEvent) => {
   element?.focus()
   element?.scrollIntoView({ behavior: 'smooth', block: 'center' })
 }
+onMounted(() => {
+  if (status.value === 'authorization') {
+    return navigateTo('/')
+  }
+  if (
+    useRoute().query.expired === 'true' &&
+    useRoute().fullPath.startsWith('/auth')
+  ) {
+    useToast().add({ title: 'Phiên đăng nhập đã hết hạn' })
+    return
+  }
+})
 </script>

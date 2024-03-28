@@ -10,8 +10,10 @@
       >
         <UIcon
           name="i-heroicons-arrow-left-on-rectangle"
-          class="w-6 h-6 rotate-180"
+          class="w-6 h-6 rotate-180 cursor-pointer"
+          @click="signOut"
         />
+        <DarkMode />
         <UIcon name="i-heroicons-user" class="w-6 h-6" />
         <UFormGroup>
           <template #label>
@@ -21,7 +23,7 @@
                 alt="avater"
                 size="sm"
               />
-              <span>{{ authState.user?.record?.username || '' }}</span>
+              <span>{{ userData?.username || '' }}</span>
             </div>
           </template>
         </UFormGroup>
@@ -32,5 +34,5 @@
 </template>
 
 <script setup lang="ts">
-const authState = useAuthStore()
+const { userData, signOut } = useAuth()
 </script>

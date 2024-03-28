@@ -1,10 +1,13 @@
 <template>
-  <div class="">
-    <UButton>HomePage</UButton>
-    <UButton @click="signOut">Sign Out</UButton>
-  </div>
+  <UCard class="" :ui="{ shadow: '', ring: '' }">
+    <template #header>
+      <HeaderPage>Homepage</HeaderPage>
+    </template>
+  </UCard>
 </template>
 
 <script setup lang="ts">
-const { signOut } = useAuthStore()
+definePageMeta({
+  layout: 'applayout',
+})
 </script>
