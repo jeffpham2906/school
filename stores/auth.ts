@@ -36,7 +36,6 @@ export const useAuth = () => {
 
   const getUser = async () => {
     return useAPI('/v2/auth/user-info', {
-      immediate: false,
       watch: false,
       onResponse({ response }) {
         if (response.ok) {

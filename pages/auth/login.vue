@@ -61,7 +61,7 @@ const onError = async (event: FormErrorEvent) => {
 }
 onMounted(() => {
   if (isLoggedIn.value) {
-    return navigateTo('/')
+    return navigateTo(String(route.query.redirect_url) ?? '/')
   }
   if (route.query.expired === 'true' && route.fullPath.startsWith('/auth')) {
     useToast().add({ title: 'Phiên đăng nhập đã hết hạn', timeout: 2000 })

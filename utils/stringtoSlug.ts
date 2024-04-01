@@ -1,4 +1,7 @@
 export function stringToSlug(str: string | null) {
+  if (!str) {
+    return
+  }
   // remove accents
   const from =
       'àáãảạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệđùúủũụưừứửữựòóỏõọôồốổỗộơờớởỡợìíỉĩịäëïîöüûñçýỳỹỵỷ',

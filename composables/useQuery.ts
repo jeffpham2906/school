@@ -2,11 +2,11 @@ export const useQuery = () => {
   const route = useRoute()
   const router = useRouter()
 
-  const setRoute = (field: object, clearLabel?: string) => {
+  const setRoute = (field: object, clearLabel?: string | string[]) => {
     const newRoute = { ...route.query, ...field }
     if (clearLabel === '' || clearLabel) {
       const key = Object.getOwnPropertyNames(field)[0]
-      if (String(newRoute[key]) === clearLabel) {
+      if (clearLabel.includes(String(newRoute[key]))) {
         delete newRoute[key]
       }
     }

@@ -44,16 +44,22 @@
         />
         <SelectSort
           :options="[
-            { label: 'Sắp xếp theo' },
+            { label: 'Sắp xếp theo', value: '' },
             {
               label: 'Thời gian tạo (mới nhất)',
-              value: {
-                createdAt: -1,
-              },
+              value: 'sort[createdAt]=-1',
             },
             {
               label: 'Thời gian tạo (cũ nhất)',
-              value: { createdAt: 1 },
+              value: 'sort[createdAt]=1',
+            },
+            {
+              label: 'Mã giáo viên (tăng dần)',
+              value: 'sort[teacherCode]=1',
+            },
+            {
+              label: 'Mã giáo viên (giảm dần)',
+              value: 'sort[teacherCode]=-1',
             },
           ]"
         />
@@ -79,7 +85,7 @@
         <span
           :class="[
             searchQuery !== '' &&
-              row.slug.includes(stringToSlug(searchQuery)) &&
+              row.slug.includes(stringToSlug(searchQuery + '')) &&
               'text-green-600',
           ]"
         >
@@ -190,7 +196,7 @@ const modal = useModal()
 const isOpen = ref(false)
 
 const isPopupOpen = ref(false)
-const searchQuery = ref('')
+const searchQuery = ref(route.query.search || '')
 const deleteId = ref('')
 
 const { queries, setRoute } = useQuery()
