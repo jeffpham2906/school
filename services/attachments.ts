@@ -1,4 +1,5 @@
 import type { AsyncData } from '#app'
+import USpin from '~/components/USpin.vue'
 import type { FileData } from '~/types'
 
 const getSignatureUpload = (filename: string) => {
@@ -25,6 +26,7 @@ interface FormData {
 }
 export const doUpload = async (file: File): Promise<FileData | undefined> => {
   const toast = useToast()
+  const modal = useModal()
   const { data: signData, error } = (await getSignatureUpload(
     file.name
   )) as AsyncData<{ data: FormData }, unknown>
@@ -32,6 +34,7 @@ export const doUpload = async (file: File): Promise<FileData | undefined> => {
     toast.add({ title: 'GetSignature failed' })
     return undefined
   }
+
   const formDataReq = new FormData()
   const signFormData = toRaw(signData.value.data.formData)
   for (const key in signFormData) {
@@ -40,17 +43,16 @@ export const doUpload = async (file: File): Promise<FileData | undefined> => {
   }
   formDataReq.append('file', file)
 
-  return await $fetch(signData.value.data.postURL, {
+  modal.open(USpin)
+  await $fetch(signData.value.data.postURL, {
     method: 'POST',
-
     body: formDataReq,
-  }).then(() => {
-    return {
-      filename: file.name,
-      ext: file.name.split('.')[1],
-      key: signFormData.key,
-      bucket: signFormData.bucket,
-      url: signData.value.data.getUrl,
-    }
-  })
+  }).finally(() => modal.close())
+  return {
+    filename: file.name,
+    ext: file.name.split('.')[1],
+    key: signFormData.key,
+    bucket: signFormData.bucket,
+    url: signData.value.data.getUrl,
+  }
 }

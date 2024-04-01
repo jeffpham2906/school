@@ -59,27 +59,42 @@
               :disabled="isEdited ? !isEditing : false"
             />
           </UFormGroup>
-          <!-- <UFormGroup label="Avatar" name="avatar">
+          <UFormGroup
+            label="Hợp đồng"
+            name="contracts"
+            :ui="{ hint: 'cursor-pointer text-gray-500 dark:text-gray-200' }"
+          >
+            <template #hint>
+              <div @click="fileContracts.click()">
+                <label>
+                  <UButton
+                    icon="i-heroicons-plus"
+                    class="w-5 h-5 flex items-center justify-center"
+                    :ui="{ rounded: 'rounded-full' }"
+                    color="gray"
+                  />
+                </label>
+                <input
+                  type="file"
+                  @change="handleFileChange($event, 'contracts')"
+                  accept=".jpg, .jpeg, .png, .doc, .docx, .pdf"
+                  class="absolute inset-0 opacity-80"
+                  hidden
+                  ref="fileContracts"
+                  :disabled="isEdited && !isEditing"
+                />
+              </div>
+            </template>
             <USkeleton v-if="pending" class="w-full h-8" />
-            <UInput
-              v-else
-              :value="state.avatar?.filename"
-              :disabled="isEdited ? !isEditing : false"
-            />
-          </UFormGroup> -->
-          <UFormGroup label="Hợp đồng" name="contracts">
-            <USkeleton v-if="pending" class="w-full h-8" />
-            <UInput
-              v-else-if="!isEdited || isEditing"
-              type="file"
-              multiple
-              @change="handleFileChange($event, 'contracts')"
-              accept=".jpg, .jpeg, .png, .doc, .docx, .pdf"
-            />
             <UDropdown
               v-else
               :items="[state.contracts]"
-              :ui="{ wrapper: 'w-full' }"
+              :ui="{
+                wrapper: 'w-full',
+                item: {
+                  base: 'justify-between',
+                },
+              }"
             >
               <UButton
                 variant="outline"
@@ -97,9 +112,16 @@
                 :label="`Tất cả (${state.contracts?.length || '0'})`"
               />
               <template #item="{ item }">
-                <ULink :to="item.url" target="_blank">
+                <ULink :to="item.url" target="_blank" class="truncate">
                   {{ item.filename }}
                 </ULink>
+                <UButton
+                  v-show="!isEdited || isEditing"
+                  icon="i-heroicons-x-mark"
+                  color="gray"
+                  variant="ghost"
+                  @click="handleDeleteContract(item)"
+                />
               </template>
             </UDropdown>
           </UFormGroup>
@@ -275,23 +297,28 @@
                   },
                 }"
                 size="3xl"
-                icon="i-heroicons-camera"
+                icon="i-heroicons-user"
                 class="relative"
               >
                 <div
                   v-if="!isEdited || isEditing"
                   class="absolute right-0 bottom-0"
+                  @click="fileAvatar.click()"
                 >
-                  <UButton
-                    icon="i-heroicons-camera"
-                    class="w-8 h-8"
-                    :ui="{ rounded: 'rounded-full' }"
-                    color="gray"
-                  />
-                  <UInput
+                  <label>
+                    <UButton
+                      icon="i-heroicons-camera"
+                      class="w-8 h-8 cursor-pointer"
+                      :ui="{ rounded: 'rounded-full' }"
+                      color="gray"
+                    />
+                  </label>
+                  <input
                     type="file"
-                    class="w-8 h-8 opacity-0 absolute inset-0"
+                    class="opacity-0 absolute inset-0"
                     @change="handleFileChange($event, 'avatar')"
+                    ref="fileAvatar"
+                    hidden
                   />
                 </div>
               </UAvatar>
@@ -310,7 +337,7 @@
             :trailing="true"
             @click="form.submit()"
             :disabled="isEdited ? !isEditing : false"
-            :loading="isLoading"
+            :variant="isEdited ? (!isEditing ? 'soft' : 'solid') : 'solid'"
           >
             {{ isEdited ? 'Sửa' : 'Tạo' }}
           </UButton>
@@ -336,6 +363,7 @@ import type { FormErrorEvent, FormSubmitEvent } from '#ui/types'
 import { createTeacher } from '~/services/teachers'
 import { teacherSchema } from '~/schema'
 import type { AsyncData } from '#app'
+import USpin from './USpin.vue'
 
 const props = defineProps<{
   // eslint-disable-next-line @typescript-eslint/ban-types
@@ -361,37 +389,51 @@ let initialValue: Teacher = {
   type: 'official',
   status: 'active',
 }
-const route = useRoute()
 const isOpen = defineModel()
-const isEdited = computed(() => !!route.params.id)
-const isEditing = ref(false)
+
+const fileContracts = ref()
+const fileAvatar = ref()
 const form = ref()
+const isEditing = ref(false)
 const state = ref<Teacher>(initialValue)
+
+const route = useRoute()
+const modal = useModal()
+
+const isEdited = computed(() => !!route.params.id)
 const pending = computed(() => status.value === 'pending')
-const isLoading = ref(false)
+
 const { data, execute, status } = (await getTeacher(
   route.params.id + ''
 )) as AsyncData<Detail<Teacher>, unknown>
 
-const handleFileChange = async (
-  e: { target: { files: File[] } },
-  field: string
-) => {
+const handleFileChange = async (e: Event, field: string) => {
+  modal.open(USpin)
+  // @ts-expect-error file
+  const file = e.target.files[0]
+
   if (field === 'avatar') {
-    state.value.avatar = await doUpload(e.target.files[0])
+    state.value.avatar = await doUpload(file).finally(() => modal.close())
   } else if (field === 'contracts') {
-    const fileArr = Array.from(e.target.files)
-    const arrUploadImage = fileArr.map((file) => doUpload(file))
-    Promise.all(arrUploadImage).then(
-      (data) => (state.value.contracts = data as FileData[])
-    )
-    console.log(state.value)
+    const newContract = await doUpload(file).finally(() => modal.close())
+    if (newContract) {
+      if (state.value.contracts) {
+        state.value.contracts = [...state.value.contracts, newContract]
+      } else {
+        state.value.contracts = [newContract]
+      }
+    }
   }
 }
-// (state.value.contracts = data as FileData[])
+
+const handleDeleteContract = (contract: FileData) => {
+  state.value.contracts = state.value.contracts?.filter(
+    (item) => item.key !== contract.key
+  )
+}
 const onSubmit = async (event: FormSubmitEvent<Teacher>) => {
   form.value.clear()
-  isLoading.value = true
+  modal.open(USpin)
   let res
   let resError
 
@@ -404,13 +446,13 @@ const onSubmit = async (event: FormSubmitEvent<Teacher>) => {
     const { data: resUpdate, error: errUpdate } = await updateTeacher(
       data,
       String(route.params.id)
-    ).finally(() => (isLoading.value = false))
+    )
     res = resUpdate.value
     resError = errUpdate.value
   } else {
     const { error: errCreate, data: resCreate } = await createTeacher(
       event.data
-    ).finally(() => (isLoading.value = false))
+    )
     res = resCreate.value
     resError = errCreate.value
   }
@@ -426,17 +468,18 @@ const onSubmit = async (event: FormSubmitEvent<Teacher>) => {
           }
         }
       )
-      form.value.setErrors(errMsg)
+      return form.value.setErrors(errMsg)
     } else {
       useToast().add({ title: resError?.data.message })
     }
-    return
+    modal.close()
   }
   if (res) {
     await props.refreshFc()
     useToast().add({
       title: isEdited.value ? 'Sửa thành công' : 'Tạo thành công',
     })
+    modal.close()
     return (isOpen.value = false)
   }
 }
@@ -452,7 +495,6 @@ onMounted(async () => {
     state.value = newState
     initialValue = toRaw({ ...newState })
   }
-  console.log(state.value)
 })
 
 onUnmounted(() => {

@@ -1,14 +1,16 @@
 import type { UseFetchOptions } from '#app'
 import defu from 'defu'
+import USpin from '~/components/USpin.vue'
 type FetchOptions<T> = UseFetchOptions<T> & { timeout?: number }
 
 export const useAPI = async <T = unknown>(
   url: string | (() => string),
   userOptions: FetchOptions<T> = {}
 ) => {
-  const { start, finish } = useLoadingIndicator()
   const { token, refresh } = useAuth()
+  const toast = useToast()
   const config = useRuntimeConfig()
+  const modal = useModal()
   const abortController = new AbortController()
   const timeoutId = setTimeout(() => {
     abortController.abort(
@@ -16,7 +18,7 @@ export const useAPI = async <T = unknown>(
         message: 'This request has been automatically aborted.',
       })
     )
-  }, userOptions.timeout)
+  }, userOptions.timeout || 10000)
 
   const defaultOptions: FetchOptions<T> = {
     baseURL: `${config.public.baseUrl}`,
@@ -40,15 +42,7 @@ export const useAPI = async <T = unknown>(
       const hasError =
         !response.ok || response.status.toString().startsWith('4')
       if (hasError) {
-        // if (response.status === 401) {
-        //   return await refresh()
-        // } else {
-        //   throw createError({
-        //     statusCode: response.status,
-        //     message:
-        //       response._data?.message || JSON.stringify(response._data.error),
-        //   })
-        // }
+        console.log('Has error')
       }
     },
 
@@ -59,31 +53,19 @@ export const useAPI = async <T = unknown>(
           this.retry = 0
         }
       }
-      // const statusCode = response.status || 500
-      // const statusMessage = response || ''
-      // const errorsMsg = (response._data || {}) as ErrorTypes
-
-      // const errorEntries = Object.entries(errorsMsg.errors)
-
-      // const message = errorEntries.reduce((acc: string[], [key, value]) => {
-      //   return [...acc, ...value.map((item) => `${key} ${item}`)]
-      // }, [])
-
-      // throw createError({
-      //   statusCode,
-      //   statusMessage,
-      //   message: message.join(ERROR_SEPARATOR),
-      // })
+      if (response.status.toString().startsWith('5')) {
+        toast.add({ title: response._data.message })
+      }
     },
   }
 
   const options = defu(userOptions, defaultOptions)
-  start()
+  modal.open(USpin)
   return useFetch(url, options)
     .finally(() => {
       if (timeoutId) {
         clearTimeout(timeoutId)
       }
     })
-    .finally(() => finish())
+    .finally(() => modal.close())
 }

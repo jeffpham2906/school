@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1 class="text-center text-3xl my-4">Login</h1>
+    <h1 class="text-center text-3xl my-4 dark:text-gray-200">Login</h1>
     <UForm
       :schema="userLoginSchema"
       :state="state"
@@ -13,7 +13,7 @@
         <UInput v-model="state.username" />
       </UFormGroup>
       <UFormGroup label="Password" name="password" required>
-        <UInput v-model="state.password" />
+        <UInput v-model="state.password" type="password" />
       </UFormGroup>
       <UButton
         type="submit"
@@ -21,7 +21,6 @@
         >Login</UButton
       >
       <UButton
-        to="/auth/signup"
         variant="link"
         class="mx-auto flex items-center justify-center w-32"
       >
@@ -33,33 +32,26 @@
 
 <script setup lang="ts">
 import type { FormErrorEvent, FormSubmitEvent } from '#ui/types'
-import * as yup from 'yup'
 import type { UserLogin } from '~/types'
+import { userLoginSchema } from '~/schema'
 
 definePageMeta({
   layout: 'auth-layout',
 })
-const userLoginSchema = yup.object({
-  username: yup
-    .string()
-    .required('Username is required')
-    .min(6, 'Username at least 6 character'),
-  password: yup
-    .string()
-    .required('Password is required')
-    .min(6, 'Password at least 6 character'),
-})
+
 const state = reactive<UserLogin>({
   username: '',
   password: '',
 })
 const form = ref()
-const { signIn, status } = useAuth()
-// const isLoading = computed(() => status.value === 'loading')
+const { signIn, isLoggedIn } = useAuth()
+const route = useRoute()
 const onSubmit = async (event: FormSubmitEvent<UserLogin>) => {
-  await signIn(event.data).catch((err) =>
-    form.value.setErrors([{ message: err.data?.message, path: 'username' }])
-  )
+  const { execute, error } = await signIn(event.data, route.query.redirect_url)
+  await execute()
+  if (error.value) {
+    form.value.setErrors([{ path: 'username', message: error.value.message }])
+  }
 }
 
 const onError = async (event: FormErrorEvent) => {
@@ -68,14 +60,11 @@ const onError = async (event: FormErrorEvent) => {
   element?.scrollIntoView({ behavior: 'smooth', block: 'center' })
 }
 onMounted(() => {
-  if (status.value === 'authorization') {
+  if (isLoggedIn.value) {
     return navigateTo('/')
   }
-  if (
-    useRoute().query.expired === 'true' &&
-    useRoute().fullPath.startsWith('/auth')
-  ) {
-    useToast().add({ title: 'Phiên đăng nhập đã hết hạn' })
+  if (route.query.expired === 'true' && route.fullPath.startsWith('/auth')) {
+    useToast().add({ title: 'Phiên đăng nhập đã hết hạn', timeout: 2000 })
     return
   }
 })

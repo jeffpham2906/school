@@ -1,6 +1,8 @@
 <template>
   <div>
-    <div class="h-screen grid grid-rows-[auto,1fr] grid-cols-[auto,1fr]">
+    <div
+      class="h-screen grid grid-rows-[auto,1fr] grid-cols-[auto,1fr] dark:bg-gray-900"
+    >
       <div class="row-start-1 row-end-3 px-6 py-3 border-r">
         <h1 class="text-center font-semibold px-4 py-2 mb-6">Logo</h1>
         <NavBar />
@@ -14,7 +16,11 @@
           @click="signOut"
         />
         <DarkMode />
-        <UIcon name="i-heroicons-user" class="w-6 h-6" />
+        <UIcon
+          name="i-heroicons-user"
+          class="w-6 h-6"
+          @click="handleOpenModal"
+        />
         <UFormGroup>
           <template #label>
             <div class="flex items-center gap-1">
@@ -34,5 +40,11 @@
 </template>
 
 <script setup lang="ts">
+import USpin from '~/components/USpin.vue'
+
 const { userData, signOut } = useAuth()
+const modal = useModal()
+const handleOpenModal = () => {
+  modal.open(USpin)
+}
 </script>

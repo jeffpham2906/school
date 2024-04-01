@@ -8,11 +8,7 @@
       divide: '',
     }"
   >
-    <PopUp
-      v-model="isPopupOpen"
-      @onLeftClick="handleDeleteTeacher"
-      :loading="isLoading"
-    />
+    <PopUp v-model="isPopupOpen" @onLeftClick="handleDeleteTeacher" />
     <TeacherModel v-if="isOpen" v-model="isOpen" :refresh-fc="refresh" />
     <template #header>
       <HeaderPage>Giáo viên</HeaderPage>
@@ -41,12 +37,26 @@
         <SelectFilter
           :options="[
             { label: 'Trạng thái', value: 'status' },
-            { label: 'Active', value: 'active' },
-            { label: 'Disabled', value: 'disabled' },
+            { label: 'Hoạt động', value: 'active' },
+            { label: 'Không hoạt động', value: 'disabled' },
           ]"
           label-filter="filter[status]"
         />
-        <USelect :options="sortOptions" />
+        <SelectSort
+          :options="[
+            { label: 'Sắp xếp theo' },
+            {
+              label: 'Thời gian tạo (mới nhất)',
+              value: {
+                createdAt: -1,
+              },
+            },
+            {
+              label: 'Thời gian tạo (cũ nhất)',
+              value: { createdAt: 1 },
+            },
+          ]"
+        />
         <UButton
           label="Reset"
           icon="i-heroicons-funnel"
@@ -64,11 +74,7 @@
         @click="isOpen = true"
       />
     </div>
-    <UTable
-      :columns="columns"
-      :rows="dataTable"
-      :loading="pending || isLoading"
-    >
+    <UTable :columns="columns" :rows="dataTable" :loading="pending">
       <template #name-data="{ row }">
         <span
           :class="[
@@ -81,18 +87,35 @@
         </span>
       </template>
       <template #gender-data="{ row }">
-        <span class="capitalize">{{ row.gender }}</span>
+        <span>
+          {{
+            row.gender === 'male'
+              ? 'Nam'
+              : row.gender === 'female'
+                ? 'Nữ'
+                : 'Khác'
+          }}
+        </span>
       </template>
       <template #type-data="{ row }">
-        <span class="capitalize">{{ row.type }}</span>
+        <span>
+          {{
+            row.type === 'official'
+              ? 'Chính thức'
+              : row.type === 'contract'
+                ? 'Hợp đồng'
+                : 'Parttime'
+          }}
+        </span>
       </template>
       <template #status-data="{ row }">
         <UBadge
-          :label="row.status === 'active' ? 'Active' : 'Disabled'"
+          :label="row.status === 'active' ? 'Hoạt động' : 'Không hoạt động'"
           variant="soft"
           :color="row.status === 'active' ? 'primary' : 'white'"
           size="xs"
-      /></template>
+        />
+      </template>
       <template #actions-data="{ row }">
         <UDropdown
           :items="actionsData"
@@ -130,12 +153,12 @@
             size="xs"
           />
           <span class="text-sm"
-            >Showing {{ pageFrom }} to {{ pageTo }} of
-            {{ totalResults }} results</span
+            >Hiển thị từ {{ pageFrom }} đến {{ pageTo }} trên
+            {{ totalResults }} kết quả</span
           >
         </div>
         <span class="flex items-center gap-1.5 text-sm"
-          >Rows per page :
+          >Giới hạn mỗi trang :
           <SelectFilter
             :options="[
               { label: '10', value: '10' },
@@ -152,6 +175,7 @@
 
 <script setup lang="ts">
 import type { AsyncData } from '#app'
+import USpin from '~/components/USpin.vue'
 import { useQuery } from '~/composables/useQuery'
 import { deleteTeacher, getAllTeachers } from '~/services/teachers'
 import type { GetResponseData } from '~/types'
@@ -162,13 +186,13 @@ definePageMeta({
 })
 
 const route = useRoute()
+const modal = useModal()
 const isOpen = ref(false)
 
 const isPopupOpen = ref(false)
 const searchQuery = ref('')
 const deleteId = ref('')
 
-const isLoading = ref(false)
 const { queries, setRoute } = useQuery()
 const page = ref(Number(route.query?.page) || 1)
 
@@ -176,26 +200,19 @@ watch(page, () => {
   setRoute({ page: page.value })
 })
 
-const sortOptions = [
-  { label: 'sort' },
-  { label: 'sort by id (recent first)', value: -1, labelSort: 'id' },
-  { label: 'sort by id (earlier)', value: 1, labelSort: 'id' },
-]
-// const sort = ref()
-
 // Fetch Data
 const { data, refresh, pending } = (await getAllTeachers(queries)) as AsyncData<
   { data: GetResponseData<Teacher> },
   unknown
 >
 const handleDeleteTeacher = async () => {
-  isLoading.value = true
+  modal.open(USpin)
   await deleteTeacher(deleteId.value)
     .then(() => refresh())
     .finally(() => {
       deleteId.value = ''
       isPopupOpen.value = false
-      isLoading.value = false
+      modal.close()
     })
 }
 

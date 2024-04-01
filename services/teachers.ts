@@ -48,22 +48,24 @@ export const deleteTeacher = async (id: string) => {
   return useAPI(`/teachers/${id}`, {
     method: 'DELETE',
     async onResponse({ response }) {
-      if (!response.ok) {
-        return useToast().add({
+      if (response.ok) {
+        useToast().add({
+          title: 'Xoá thành công',
+          timeout: 2500,
+          icon: 'i-heroicons-check-circle',
+        })
+      }
+    },
+    onRequestError({ response }) {
+      console.log('errr', response)
+      if (response?._data) {
+        useToast().add({
           title: response._data.message,
           icon: 'i-heroicons-x-circle',
           color: 'red',
           timeout: 2500,
         })
       }
-      useToast().add({
-        title: 'Xoá thành công',
-        timeout: 2500,
-        icon: 'i-heroicons-check-circle',
-      })
-    },
-    onRequestError({ response }) {
-      console.log('errr', response)
     },
   })
 }

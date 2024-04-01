@@ -9,7 +9,6 @@
           icon="i-heroicons-check-circle"
           trailing
           @click="emit('onLeftClick')"
-          :loading="loading"
         />
         <UButton
           label="Không"
@@ -24,8 +23,5 @@
 
 <script setup lang="ts">
 const isOpen = defineModel()
-defineProps<{
-  loading: boolean
-}>()
 const emit = defineEmits<{ onLeftClick: [] }>()
 </script>
