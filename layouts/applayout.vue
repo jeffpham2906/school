@@ -16,19 +16,11 @@
           @click="signOut"
         />
         <DarkMode />
-        <UIcon
-          name="i-heroicons-user"
-          class="w-6 h-6"
-          @click="handleOpenModal"
-        />
+        <UIcon name="i-heroicons-user" class="w-6 h-6" />
         <UFormGroup>
           <template #label>
             <div class="flex items-center gap-1">
-              <UAvatar
-                src="https://dev-minio.vais.vn/asahi-e-school-mng/public/avataaars.png"
-                alt="avater"
-                size="sm"
-              />
+              <UAvatar alt="avater" size="sm" />
               <span>{{ userData?.username || '' }}</span>
             </div>
           </template>
@@ -40,11 +32,5 @@
 </template>
 
 <script setup lang="ts">
-import USpin from '~/components/USpin.vue'
-
 const { userData, signOut } = useAuth()
-const modal = useModal()
-const handleOpenModal = () => {
-  modal.open(USpin)
-}
 </script>
