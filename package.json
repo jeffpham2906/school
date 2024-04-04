@@ -10,16 +10,17 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
-    "@nuxt/ui": "^2.14.2",
+    "@nuxt/ui": "^2.15.1",
     "date-fns": "^2.30.0",
     "defu": "^6.1.4",
     "nuxt": "^3.10.3",
     "v-calendar": "^3.1.2",
-    "vue": "^3.4.19",
+    "vue": "^3.4.21",
     "vue-router": "^4.3.0",
     "yup": "^1.4.0"
   },
   "devDependencies": {
+    "@nuxtjs/i18n": "^8.2.0",
     "@typescript-eslint/eslint-plugin": "^7.1.1",
     "@typescript-eslint/parser": "^7.1.1",
     "autoprefixer": "^10.4.18",

@@ -36,15 +36,11 @@ export const useAuth = () => {
 
   const getUser = async () => {
     return useAPI('/v2/auth/user-info', {
-      watch: false,
       onResponse({ response }) {
         if (response.ok) {
           userData.value = response._data.data.record
           return
         }
-      },
-      onRequestError() {
-        console.log('error get user')
       },
     })
   }

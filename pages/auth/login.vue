@@ -59,9 +59,10 @@ const onError = async (event: FormErrorEvent) => {
   element?.focus()
   element?.scrollIntoView({ behavior: 'smooth', block: 'center' })
 }
-onMounted(() => {
+onMounted(async () => {
+  console.log(isLoggedIn.value)
   if (isLoggedIn.value) {
-    return navigateTo(String(route.query.redirect_url) ?? '/')
+    return await navigateTo(String(route.query.redirect_url ?? '/'))
   }
   if (route.query.expired === 'true' && route.fullPath.startsWith('/auth')) {
     useToast().add({ title: 'Phiên đăng nhập đã hết hạn', timeout: 2000 })

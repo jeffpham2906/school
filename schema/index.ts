@@ -12,7 +12,8 @@ export const teacherSchema = yup.object<Teacher>({
   phone: yup
     .string()
     .required('Vui lòng nhập SĐT')
-    .matches(phoneRegex, 'SĐT không hợp lệ'),
+    .matches(phoneRegex, 'SĐT không hợp lệ')
+    .max(11, 'SĐT không hợp lệ'),
   dateOfBirth: yup.date().default(() => new Date()),
   gender: yup.string<Gender>(),
   nationality: yup.string(),

@@ -2,8 +2,8 @@
   <UInput
     :value="searchQuery"
     icon="i-heroicons-magnifying-glass-20-solid"
-    placeholder="Tìm kiếm theo tên/mã"
-    class="w-64"
+    :placeholder="`${$t('search_by_name/id')}`"
+    class="w-72"
     @input="update"
   />
 </template>

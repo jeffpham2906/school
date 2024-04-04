@@ -16,11 +16,24 @@
           @click="signOut"
         />
         <DarkMode />
+        <USelectMenu
+          v-model="language"
+          :options="locales"
+          padding="2xs"
+          variant="outline"
+          class="w-fit"
+          option-attribute="name"
+        >
+        </USelectMenu>
         <UIcon name="i-heroicons-user" class="w-6 h-6" />
         <UFormGroup>
           <template #label>
             <div class="flex items-center gap-1">
-              <UAvatar alt="avater" size="sm" />
+              <UAvatar
+                src="https://dev-minio.vais.vn/asahi-e-school-mng/public/avataaars.png"
+                alt="avater"
+                size="sm"
+              />
               <span>{{ userData?.username || '' }}</span>
             </div>
           </template>
@@ -33,4 +46,11 @@
 
 <script setup lang="ts">
 const { userData, signOut } = useAuth()
+const { locale, locales, setLocale } = useI18n()
+const language = computed({
+  get: () => locale.value,
+  set: (value) => {
+    setLocale(value.iso)
+  },
+})
 </script>

@@ -5,7 +5,7 @@ export interface GetAllStudentsProps {
   // 'filter[type]'?: string | null
   // 'filter[status]'?: string | null
 }
-export const getAllStudents = (queries?: ComputedRef<GetAllStudentsProps>) => {
+export const getAllStudents = (queries?: Ref<GetAllStudentsProps>) => {
   return useAPI(() => '/students', {
     query: queries,
     watch: queries ? [queries] : false,

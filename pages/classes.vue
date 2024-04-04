@@ -8,12 +8,10 @@
       divide: '',
     }"
   >
-    <HeaderPage>{{ $t('students_title') }}</HeaderPage>
+    <HeaderPage>{{ $t('classes_title') }}</HeaderPage>
   </UCard>
 </template>
 
 <script setup lang="ts">
-definePageMeta({
-  layout: 'applayout',
-})
+definePageMeta({ layout: 'applayout' })
 </script>

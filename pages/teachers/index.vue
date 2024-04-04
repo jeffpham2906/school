@@ -11,112 +11,68 @@
     <PopUp v-model="isPopupOpen" @onLeftClick="handleDeleteTeacher" />
     <TeacherModel v-if="isOpen" v-model="isOpen" :refresh-fc="refresh" />
     <template #header>
-      <HeaderPage>Giáo viên</HeaderPage>
+      <HeaderPage>{{ $t('listTeachers') }}</HeaderPage>
     </template>
     <div class="flex items-center justify-between px-4 py-3">
       <div class="flex gap-2">
         <SeachBar v-model="searchQuery" />
         <SelectFilter
-          :options="[
-            { label: 'Giới tính', value: 'gender' },
-            { label: 'Nam', value: 'male' },
-            { label: 'Nữ', value: 'female' },
-            { label: 'Khác', value: 'other' },
-          ]"
-          label-filter="filter[gender]"
+          :options="['male', 'female', 'other']"
+          label-filter="gender"
         />
         <SelectFilter
-          :options="[
-            { label: 'Loại', value: 'type' },
-            { label: 'Chính thức', value: 'official' },
-            { label: 'Hợp đồng', value: 'contract' },
-            { label: 'Parttime', value: 'parttime' },
-          ]"
-          label-filter="filter[type]"
+          :options="['official', 'contract', 'parttime']"
+          label-filter="type"
+          class="min-w-24"
         />
-        <SelectFilter
-          :options="[
-            { label: 'Trạng thái', value: 'status' },
-            { label: 'Hoạt động', value: 'active' },
-            { label: 'Không hoạt động', value: 'disabled' },
-          ]"
-          label-filter="filter[status]"
-        />
-        <SelectSort
-          :options="[
-            { label: 'Sắp xếp theo', value: '' },
-            {
-              label: 'Thời gian tạo (mới nhất)',
-              value: 'sort[createdAt]=-1',
-            },
-            {
-              label: 'Thời gian tạo (cũ nhất)',
-              value: 'sort[createdAt]=1',
-            },
-            {
-              label: 'Mã giáo viên (tăng dần)',
-              value: 'sort[teacherCode]=1',
-            },
-            {
-              label: 'Mã giáo viên (giảm dần)',
-              value: 'sort[teacherCode]=-1',
-            },
-          ]"
-        />
-        <UButton
-          label="Reset"
-          icon="i-heroicons-funnel"
-          size="xs"
-          variant="solid"
-          color="white"
-          to="/teachers"
-        />
+        <SelectFilter :options="['active', 'disabled']" label-filter="status" />
       </div>
 
       <UButton
-        label="Thêm mới"
+        :label="$t('add')"
         icon="i-heroicons-plus"
         :trailing="true"
-        @click="isOpen = true"
+        @click="
+          () => {
+            isOpen = true
+            $route.query.status = 'add'
+          }
+        "
       />
     </div>
     <UTable :columns="columns" :rows="dataTable" :loading="pending">
+      <template #teacherCode-header>
+        {{ $t('teacherCode') }}
+      </template>
+      <template #name-header>
+        {{ $t('name') }}
+      </template>
+      <template #gender-header>
+        {{ $t('gender') }}
+      </template>
+      <template #phone-header>
+        {{ $t('phone') }}
+      </template>
+      <template #email-header> Email </template>
+      <template #type-header>
+        {{ $t('type') }}
+      </template>
+      <template #status-header>
+        {{ $t('status') }}
+      </template>
       <template #name-data="{ row }">
-        <span
-          :class="[
-            searchQuery !== '' &&
-              row.slug.includes(stringToSlug(searchQuery + '')) &&
-              'text-green-600',
-          ]"
-        >
-          {{ row.name }}
-        </span>
+        <span v-if="row._highlight" v-html="row._highlight.name[0]" />
+        <span v-else> {{ row.name }}</span>
       </template>
       <template #gender-data="{ row }">
-        <span>
-          {{
-            row.gender === 'male'
-              ? 'Nam'
-              : row.gender === 'female'
-                ? 'Nữ'
-                : 'Khác'
-          }}
-        </span>
+        {{ $t(row.gender) }}
       </template>
       <template #type-data="{ row }">
-        <span>
-          {{
-            row.type === 'official'
-              ? 'Chính thức'
-              : row.type === 'contract'
-                ? 'Hợp đồng'
-                : 'Parttime'
-          }}
-        </span>
+        {{ $t(row.type) }}
       </template>
       <template #status-data="{ row }">
         <UBadge
-          :label="row.status === 'active' ? 'Hoạt động' : 'Không hoạt động'"
+          :label="`${$t(row.status)}`"
           variant="soft"
           :color="row.status === 'active' ? 'primary' : 'white'"
           size="xs"
@@ -136,7 +92,7 @@
             >
               <UIcon :name="item.icon" />
               <UButton
-                :label="item.label"
+                :label="$t(item.label)"
                 color="black"
                 variant="ghost"
                 size="xs"
@@ -158,22 +114,21 @@
             :max="5"
             size="xs"
           />
-          <span class="text-sm"
-            >Hiển thị từ {{ pageFrom }} đến {{ pageTo }} trên
-            {{ totalResults }} kết quả</span
-          >
+          <span class="text-sm">
+            {{
+              `${$t('show_from')} ${pageFrom} ${$t('to')} ${pageTo} ${$t('on')} ${totalResults} ${$t('results')}`
+            }}
+          </span>
         </div>
-        <span class="flex items-center gap-1.5 text-sm"
-          >Giới hạn mỗi trang :
-          <SelectFilter
-            :options="[
-              { label: '10', value: '10' },
-              { label: '20', value: '20' },
-              { label: '50', value: '50' },
-            ]"
-            label-filter="limit"
+        <span class="flex items-center gap-1.5 text-sm">
+          {{ $t('rows_per_page') }}
+          <USelectMenu
+            :options="[10, 20, 50]"
+            placeholder="10"
             size="xs"
-        /></span>
+            v-model="limit"
+          />
+        </span>
       </div>
     </template>
   </UCard>
@@ -190,7 +145,6 @@ import type { Teacher } from '~/types/teacher.types'
 definePageMeta({
   layout: 'applayout',
 })
-
 const route = useRoute()
 const modal = useModal()
 const isOpen = ref(false)
@@ -201,16 +155,36 @@ const deleteId = ref('')
 
 const { queries, setRoute } = useQuery()
 const page = ref(Number(route.query?.page) || 1)
-
 watch(page, () => {
-  setRoute({ page: page.value })
+  setRoute({ page: page.value, limit: limit.value })
 })
-
+const limit = ref(Number(route.query?.limit) || 10)
+watch(limit, async () => {
+  useRouter().replace({
+    path: route.fullPath,
+    query: { limit: limit.value, page: 1 },
+  })
+  page.value = 1
+})
 // Fetch Data
 const { data, refresh, pending } = (await getAllTeachers(queries)) as AsyncData<
   { data: GetResponseData<Teacher> },
   unknown
 >
+const dataTable = computed(() => data.value?.data.items || [])
+const totalPages = computed(() => data.value?.data.totalPages || 1)
+const totalResults = computed(() => data.value?.data.total || 0)
+const pageFrom = computed(
+  () => (page.value - 1) * (Number(route.query.limit) || 10) + 1 || 0
+)
+const pageTo = computed(
+  () =>
+    Math.min(
+      page.value * (Number(route.query.limit) || 10),
+      totalResults.value
+    ) || ''
+)
+
 const handleDeleteTeacher = async () => {
   modal.open(USpin)
   await deleteTeacher(deleteId.value)
@@ -226,6 +200,11 @@ const handleActionClick = (action: string, id: string) => {
   switch (action) {
     case 'detail':
       route.params.id = id
+      route.query.status = 'detail'
+      return (isOpen.value = true)
+    case 'change':
+      route.params.id = id
+      route.query.status = 'change'
       return (isOpen.value = true)
     case 'delete':
       deleteId.value = id
@@ -234,68 +213,61 @@ const handleActionClick = (action: string, id: string) => {
       return
   }
 }
-const dataTable = computed(() => data.value?.data.items || [])
-const totalPages = computed(() => data.value?.data.totalPages || 1)
-const totalResults = computed(() => data.value?.data.total || 0)
-const pageFrom = computed(
-  () => (page.value - 1) * (Number(route.query.limit) || 10) + 1 || 0
-)
-const pageTo = computed(
-  () =>
-    Math.min(
-      page.value * (Number(route.query.limit) || 10),
-      totalResults.value
-    ) || ''
-)
 
 const columns = [
   {
     key: 'teacherCode',
-    label: 'Mã giáo viên',
   },
   {
     key: 'name',
-    label: 'Tên giáo viên',
   },
   {
     key: 'gender',
-    label: 'Giới tính',
   },
   {
     key: 'phone',
-    label: 'SĐT',
   },
   {
     key: 'email',
-    label: 'Email',
   },
   {
     key: 'type',
-    label: 'Loại',
   },
   {
     key: 'status',
-    label: 'Trạng thái',
   },
   {
     key: 'actions',
-    label: '...',
   },
 ]
 const actionsData = [
   [
     {
-      label: 'View detail',
+      label: 'view_detail',
       icon: 'i-heroicons-eye',
       value: 'detail',
     },
   ],
   [
     {
-      label: 'Delete',
+      label: 'change',
+      icon: 'i-heroicons-pencil-square',
+      value: 'change',
+    },
+  ],
+  [
+    {
+      label: 'delete',
       icon: 'i-heroicons-archive-box-x-mark',
       value: 'delete',
     },
   ],
 ]
 </script>
+
+<style>
+em {
+  color: #f87171;
+  font-style: normal;
+}
+</style>

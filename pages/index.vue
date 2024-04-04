@@ -1,7 +1,7 @@
 <template>
   <UCard class="" :ui="{ shadow: '', ring: '' }">
     <template #header>
-      <HeaderPage>Homepage</HeaderPage>
+      <HeaderPage>{{ $t('nav_home') }}</HeaderPage>
     </template>
   </UCard>
 </template>

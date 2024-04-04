@@ -4,7 +4,13 @@
       :links="links"
       class="w-36"
       :ui="{ base: 'gap-2.5 mb-2', size: 'text-base' }"
-    />
+    >
+      <template #default="{ link }">
+        <span class="group-hover:text-primary relative">
+          {{ $t(link.label) }}
+        </span>
+      </template>
+    </UVerticalNavigation>
   </div>
 </template>
 
@@ -16,19 +22,24 @@ interface Link {
 }
 const links: Link[] = [
   {
-    label: 'Home',
+    label: 'nav_home',
     icon: 'i-heroicons-home',
     to: '/',
   },
   {
-    label: 'Students',
+    label: 'nav_students',
     icon: 'i-heroicons-academic-cap',
     to: '/students',
   },
   {
-    label: 'Teachers',
+    label: 'nav_teachers',
     icon: 'i-heroicons-user-group',
     to: '/teachers',
+  },
+  {
+    label: 'nav_classes',
+    icon: 'i-heroicons-rectangle-group',
+    to: '/classes',
   },
 ]
 </script>

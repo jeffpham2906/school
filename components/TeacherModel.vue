@@ -12,26 +12,21 @@
       <template #header>
         <div class="flex justify-between">
           <h1>
-            {{ isEdited ? `Thông tin giáo viên ` : 'Thêm giáo viên' }}
+            {{
+              isAdd
+                ? $t('add_teacher')
+                : isChange
+                  ? $t('change_teacher')
+                  : $t('detail_teacher')
+            }}
           </h1>
-          <div>
-            <UButton
-              variant="ghost"
-              color="gray"
-              icon="i-heroicons-pencil-square"
-              class="-my-1"
-              label="Sửa"
-              v-show="isEdited"
-              @click="isEditing = true"
-            />
-            <UButton
-              color="gray"
-              variant="ghost"
-              icon="i-heroicons-x-mark-20-solid"
-              class="-my-1"
-              @click="isOpen = false"
-            />
-          </div>
+          <UButton
+            color="gray"
+            variant="ghost"
+            icon="i-heroicons-x-mark-20-solid"
+            class="-my-1"
+            @click="isOpen = false"
+          />
         </div>
       </template>
       <UForm
@@ -41,30 +36,32 @@
         @error="onError"
         ref="form"
         :validateOn="['submit']"
+        class="h-full"
       >
         <div class="grid grid-cols-4 gap-6">
+          <UFormGroup
+            v-if="!isAdd"
+            :label="$t('teacherCode')"
+            name="teacherCode"
+            required
+          >
+            <USkeleton v-if="pending" class="w-full h-8" />
+            <UInput v-else v-model="state.teacherCode" :disabled="isDetail" />
+          </UFormGroup>
           <UFormGroup label="Email" name="email" required>
             <USkeleton v-if="pending" class="w-full h-8" />
-            <UInput
-              v-else
-              v-model="state.email"
-              :disabled="isEdited ? !isEditing : false"
-            />
+            <UInput v-else v-model="state.email" :disabled="isDetail" />
           </UFormGroup>
-          <UFormGroup label="Phone" name="phone" required>
+          <UFormGroup :label="$t('phone')" name="phone" required>
             <USkeleton v-if="pending" class="w-full h-8" />
-            <UInput
-              v-else
-              v-model="state.phone"
-              :disabled="isEdited ? !isEditing : false"
-            />
+            <UInput v-else v-model="state.phone" :disabled="isDetail" />
           </UFormGroup>
           <UFormGroup
-            label="Hợp đồng"
+            :label="$t('contracts')"
             name="contracts"
             :ui="{ hint: 'cursor-pointer text-gray-500 dark:text-gray-200' }"
           >
-            <template #hint>
+            <template #hint v-if="!isDetail">
               <div @click="fileContracts.click()">
                 <label>
                   <UButton
@@ -81,7 +78,7 @@
                   class="absolute inset-0 opacity-80"
                   hidden
                   ref="fileContracts"
-                  :disabled="isEdited && !isEditing"
+                  :disabled="isDetail"
                 />
               </div>
             </template>
@@ -109,14 +106,14 @@
                     },
                   },
                 }"
-                :label="`Tất cả (${state.contracts?.length || '0'})`"
+                :label="`${$t('all')} (${state.contracts?.length || '0'})`"
               />
               <template #item="{ item }">
                 <ULink :to="item.url" target="_blank" class="truncate">
                   {{ item.filename }}
                 </ULink>
                 <UButton
-                  v-show="!isEdited || isEditing"
+                  v-show="!isDetail"
                   icon="i-heroicons-x-mark"
                   color="gray"
                   variant="ghost"
@@ -125,15 +122,11 @@
               </template>
             </UDropdown>
           </UFormGroup>
-          <UFormGroup label="Tên" name="name" required>
+          <UFormGroup :label="$t('name')" name="name" required>
             <USkeleton v-if="pending" class="w-full h-8" />
-            <UInput
-              v-else
-              v-model="state.name"
-              :disabled="isEdited ? !isEditing : false"
-            />
+            <UInput v-else v-model="state.name" :disabled="isDetail" />
           </UFormGroup>
-          <UFormGroup label="Ngày sinh" name="dateOfBirth">
+          <UFormGroup :label="$t('date_of_birth')" name="dateOfBirth">
             <USkeleton v-if="pending" class="w-full h-8" />
             <UPopover v-else>
               <UButton
@@ -146,7 +139,7 @@
                 "
                 color="gray"
                 class="w-full"
-                :disabled="isEdited ? !isEditing : false"
+                :disabled="isDetail"
               />
               <template #panel="{ close }">
                 <DatePicker
@@ -156,55 +149,46 @@
               </template>
             </UPopover>
           </UFormGroup>
-          <UFormGroup label="Giới tính" name="gender">
+          <UFormGroup :label="$t('gender')" name="gender">
             <USkeleton v-if="pending" class="w-full h-8" />
-            <USelect
-              :disabled="isEdited ? !isEditing : false"
+            <ISelect
               v-else
+              :disabled="isDetail"
               v-model="state.gender"
-              :options="[
-                {
-                  value: 'male',
-                  label: 'Nam',
-                },
-                {
-                  value: 'female',
-                  label: 'Nữ',
-                },
-                {
-                  value: 'other',
-                  label: 'Khác',
-                },
-              ]"
-            />
+              :options="['male', 'female', 'other']"
+              :placeholder="$t('select_gender')"
+            >
+              <template #labelValue>
+                {{ $t(state.gender || 'select_gender') }}
+              </template>
+            </ISelect>
           </UFormGroup>
-          <UFormGroup label="Quốc tịch" name="nationality">
+          <UFormGroup :label="$t('nationality')" name="nationality">
             <USkeleton v-if="pending" class="w-full h-8" />
-            <USelect
+            <ISelect
               v-else
               v-model="state.nationality"
-              :options="['Việt Nam']"
-              :disabled="isEdited ? !isEditing : false"
+              :options="['vietnam']"
+              :disabled="isDetail"
             />
           </UFormGroup>
-          <UFormGroup label="Số bảo hiểm" name="healthInsuranceNumber">
+          <UFormGroup
+            :label="$t('healthInsuranceNumber')"
+            name="healthInsuranceNumber"
+          >
             <USkeleton v-if="pending" class="w-full h-8" />
             <UInput
               v-else
               v-model="state.healthInsuranceNumber"
-              :disabled="isEdited ? !isEditing : false"
+              :disabled="isDetail"
             />
           </UFormGroup>
-          <UFormGroup label="Số CMND/CCCD" name="passport" required>
+          <UFormGroup :label="$t('passport')" name="passport" required>
             <USkeleton v-if="pending" class="w-full h-8" />
-            <UInput
-              v-else
-              v-model="state.passport"
-              :disabled="isEdited ? !isEditing : false"
-            />
+            <UInput v-else v-model="state.passport" :disabled="isDetail" />
           </UFormGroup>
           <UFormGroup
-            label="Địa chỉ thường trú"
+            :label="$t('permanentResidence')"
             name="permanentResidence"
             required
           >
@@ -212,69 +196,59 @@
             <UInput
               v-else
               v-model="state.permanentResidence"
-              :disabled="isEdited ? !isEditing : false"
+              :disabled="isDetail"
             />
           </UFormGroup>
-          <UFormGroup label="Địa chỉ hiện nay" name="currentAddress" required>
+          <UFormGroup
+            :label="$t('currentAddress')"
+            name="currentAddress"
+            required
+          >
             <USkeleton v-if="pending" class="w-full h-8" />
             <UInput
               v-else
               v-model="state.currentAddress"
-              :disabled="isEdited ? !isEditing : false"
+              :disabled="isDetail"
             />
           </UFormGroup>
-          <UFormGroup label="Mã lớp học" name="currentClassId">
+          <UFormGroup :label="$t('classCode')" name="currentClassId">
             <USkeleton v-if="pending" class="w-full h-8" />
             <UInput
               v-else
               v-model="state.currentClassId"
-              :disabled="isEdited ? !isEditing : false"
+              :disabled="isDetail"
             />
           </UFormGroup>
-          <UFormGroup label="Loại" name="type">
+          <UFormGroup :label="$t('type')" name="type">
             <USkeleton v-if="pending" class="w-full h-8" />
-            <USelect
+            <ISelect
               v-else
-              :disabled="isEdited ? !isEditing : false"
+              :disabled="isDetail"
               v-model="state.type"
-              :options="[
-                {
-                  value: 'official',
-                  label: 'Chính thức',
-                },
-                {
-                  value: 'contract',
-                  label: 'Hợp đồng',
-                },
-                {
-                  value: 'parttime',
-                  label: 'Tạm thời',
-                },
-              ]"
-            />
+              :options="['official', 'contract', 'parttime']"
+            >
+              <template #labelValue>
+                {{ $t(state.type) }}
+              </template>
+            </ISelect>
           </UFormGroup>
-          <UFormGroup label="Trạng thái" name="status">
+          <UFormGroup :label="$t('status')" name="status">
             <USkeleton v-if="pending" class="w-full h-8" />
-            <USelect
+            <ISelect
               v-else
-              :disabled="isEdited ? !isEditing : false"
+              :disabled="isDetail"
               v-model="state.status"
-              :options="[
-                { label: 'Hoạt động', value: 'active' },
-                {
-                  label: 'Không hoạt động',
-                  value: 'disabled',
-                },
-              ]"
-            />
+              :options="['active', 'disabled']"
+              :placeholder="$t('select_status')"
+            >
+              <template #labelValue>
+                {{ $t(state.status || 'select_status') }}
+              </template>
+            </ISelect>
           </UFormGroup>
-          <UFormGroup label="Ghi chú" name="note">
+          <UFormGroup :label="$t('note')" name="note">
             <USkeleton v-if="pending" class="w-full h-20" />
-            <UTextarea
-              v-else
-              v-model="state.note"
-              :disabled="isEdited ? !isEditing : false"
-            />
+            <UInput v-else v-model="state.note" :disabled="isDetail" />
           </UFormGroup>
           <div class="col-start-4 row-start-1 row-span-4">
             <UCard
@@ -301,7 +275,7 @@
                 class="relative"
               >
                 <div
-                  v-if="!isEdited || isEditing"
+                  v-if="!isDetail"
                   class="absolute right-0 bottom-0"
                   @click="fileAvatar.click()"
                 >
@@ -329,17 +303,161 @@
             </UCard>
           </div>
         </div>
+        <!-- <div class="grid grid-rows-2 h-full">
+          <div
+            class="grid grid-cols-[0.6fr,1fr,1fr,1fr] grid-rows-5 h-full items-center gap-x-10"
+          >
+            <h1 class="col-span-4">Thong tin ca nhan</h1>
+            <div class="row-start-2 row-end-6 justify-center flex">
+              <UAvatar
+                :src="state.avatar?.url"
+                :ui="{
+                  size: {
+                    '3xl': 'h-36 w-36',
+                  },
+                }"
+                size="3xl"
+                icon="i-heroicons-user"
+                class="relative"
+              >
+                <div
+                  v-if="!isDetail"
+                  class="absolute right-0 bottom-0"
+                  @click="fileAvatar.click()"
+                >
+                  <label>
+                    <UButton
+                      icon="i-heroicons-camera"
+                      class="w-8 h-8 cursor-pointer"
+                      :ui="{ rounded: 'rounded-full' }"
+                      color="gray"
+                    />
+                  </label>
+                  <input
+                    type="file"
+                    class="opacity-0 absolute inset-0"
+                    @change="handleFileChange($event, 'avatar')"
+                    ref="fileAvatar"
+                    hidden
+                  />
+                </div>
+              </UAvatar>
+            </div>
+            <IFormGroup :label="$t('teacherCode')">
+              <USkeleton v-if="pending" class="w-full h-8" />
+              <UInput
+                v-else
+                v-model="state.email"
+                :disabled="isDetail"
+                class="w-36"
+              />
+            </IFormGroup>
+
+            <IFormGroup :label="$t('name')">
+              <USkeleton v-if="pending" class="w-full h-8" />
+              <UInput
+                v-else
+                v-model="state.email"
+                :disabled="isDetail"
+                class="w-36"
+              />
+            </IFormGroup>
+            <IFormGroup :label="$t('date_of_birth')">
+              <USkeleton v-if="pending" class="w-full h-8" />
+              <UInput
+                v-else
+                v-model="state.email"
+                :disabled="isDetail"
+                class="w-36"
+              />
+            </IFormGroup>
+            <IFormGroup :label="$t('passport')">
+              <USkeleton v-if="pending" class="w-full h-8" />
+              <UInput
+                v-else
+                v-model="state.email"
+                :disabled="isDetail"
+                class="w-36"
+              />
+            </IFormGroup>
+            <div
+              class="grid grid-cols-2 gap-x-10 h-full col-start-3 col-end-5 row-start-2 row-end-6"
+            >
+              <IFormGroup :label="$t('gender')">
+                <USkeleton v-if="pending" class="w-full h-8" />
+                <UInput
+                  v-else
+                  v-model="state.email"
+                  :disabled="isDetail"
+                  class="w-36"
+                />
+              </IFormGroup>
+              <IFormGroup :label="$t('Email')">
+                <USkeleton v-if="pending" class="w-full h-8" />
+                <UInput
+                  v-else
+                  v-model="state.email"
+                  :disabled="isDetail"
+                  class="w-36"
+                />
+              </IFormGroup>
+              <IFormGroup :label="$t('nationality')">
+                <USkeleton v-if="pending" class="w-full h-8" />
+                <UInput
+                  v-else
+                  v-model="state.email"
+                  :disabled="isDetail"
+                  class="w-36"
+                />
+              </IFormGroup>
+
+              <IFormGroup :label="$t('phone')">
+                <USkeleton v-if="pending" class="w-full h-8" />
+                <UInput
+                  v-else
+                  v-model="state.email"
+                  :disabled="isDetail"
+                  class="w-36"
+                />
+              </IFormGroup>
+              <div class="col-start-1 col-end-3">
+                <IFormGroup :label="$t('phone')">
+                  <USkeleton v-if="pending" class="w-full h-8" />
+                  <UInput
+                    v-else
+                    v-model="state.email"
+                    :disabled="isDetail"
+                    class="w-36"
+                  />
+                </IFormGroup>
+              </div>
+              <div class="col-start-1 col-end-3">
+                <IFormGroup :label="$t('phone')">
+                  <USkeleton v-if="pending" class="w-full h-8" />
+                  <UInput
+                    v-else
+                    v-model="state.email"
+                    :disabled="isDetail"
+                    class="w-36"
+                  />
+                </IFormGroup>
+              </div>
+            </div>
+          </div>
+          <div>
+            <h1>Thong tin chung</h1>
+          </div>
+        </div> -->
       </UForm>
-      <template #footer>
+      <template #footer v-if="!isDetail">
         <div class="flex gap-6">
           <UButton
             class="w-24 items-center justify-center"
             :trailing="true"
             @click="form.submit()"
-            :disabled="isEdited ? !isEditing : false"
-            :variant="isEdited ? (!isEditing ? 'soft' : 'solid') : 'solid'"
+            :disabled="isDetail"
           >
-            {{ isEdited ? 'Sửa' : 'Tạo' }}
+            {{ $t(isAdd ? 'add' : isChange ? 'change' : 'Button') }}
           </UButton>
           <UButton
             variant="ghost"
@@ -347,7 +465,7 @@
             :trailing="true"
             @click="isOpen = false"
           >
-            Huỷ
+            {{ $t('cancel') }}
           </UButton>
         </div>
       </template>
@@ -377,7 +495,7 @@ let initialValue: Teacher = {
   phone: '',
   dateOfBirth: undefined,
   name: '',
-  gender: undefined,
+  gender: 'male',
   nationality: 'Việt Nam',
   healthInsuranceNumber: '',
   passport: '',
@@ -389,18 +507,21 @@ let initialValue: Teacher = {
   type: 'official',
   status: 'active',
 }
+
 const isOpen = defineModel()
 
 const fileContracts = ref()
 const fileAvatar = ref()
 const form = ref()
-const isEditing = ref(false)
 const state = ref<Teacher>(initialValue)
 
 const route = useRoute()
 const modal = useModal()
 
-const isEdited = computed(() => !!route.params.id)
+const isChange = computed(() => route.query.status === 'change')
+const isDetail = computed(() => route.query.status === 'detail')
+const isAdd = computed(() => route.query.status === 'add')
+
 const pending = computed(() => status.value === 'pending')
 
 const { data, execute, status } = (await getTeacher(
@@ -437,7 +558,7 @@ const onSubmit = async (event: FormSubmitEvent<Teacher>) => {
   let res
   let resError
 
-  if (isEdited.value) {
+  if (isChange.value) {
     const data = getDiffObject(initialValue, event.data)
     //@ts-expect-error email
     data.email = state.value.email
@@ -449,7 +570,7 @@ const onSubmit = async (event: FormSubmitEvent<Teacher>) => {
     )
     res = resUpdate.value
     resError = errUpdate.value
-  } else {
+  } else if (isAdd.value) {
     const { error: errCreate, data: resCreate } = await createTeacher(
       event.data
     )
@@ -477,7 +598,8 @@ const onSubmit = async (event: FormSubmitEvent<Teacher>) => {
   if (res) {
     await props.refreshFc()
     useToast().add({
-      title: isEdited.value ? 'Sửa thành công' : 'Tạo thành công',
+      title: isChange.value ? 'Sửa thành công' : isAdd && 'Tạo thành công',
+      icon: 'i-heroicons-check-circle',
     })
     modal.close()
     return (isOpen.value = false)
@@ -493,11 +615,12 @@ onMounted(async () => {
     await execute()
     const newState = data.value?.data?.record as Teacher
     state.value = newState
-    initialValue = toRaw({ ...newState })
+    initialValue = { ...newState }
   }
 })
 
 onUnmounted(() => {
   delete route.params.id
+  delete route.query.status
 })
 </script>
