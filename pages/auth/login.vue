@@ -44,7 +44,7 @@ const state = reactive<UserLogin>({
   password: '',
 })
 const form = ref()
-const { signIn, isLoggedIn } = useAuth()
+const { signIn } = useAuth()
 const route = useRoute()
 const onSubmit = async (event: FormSubmitEvent<UserLogin>) => {
   const { error } = await signIn(event.data, route.query.redirect_url)
@@ -59,9 +59,6 @@ const onError = async (event: FormErrorEvent) => {
   element?.scrollIntoView({ behavior: 'smooth', block: 'center' })
 }
 onMounted(async () => {
-  if (isLoggedIn.value) {
-    return await navigateTo(String(route.query.redirect_url ?? '/'))
-  }
   if (route.query.expired === 'true' && route.fullPath.startsWith('/auth')) {
     useToast().add({ title: 'Phiên đăng nhập đã hết hạn', timeout: 2000 })
     return

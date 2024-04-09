@@ -30,14 +30,19 @@ export const useAuth = () => {
   }
 
   const getUser = async () => {
-    return useAPI('/v2/auth/user-info', {
+    const { error } = await useAPI('/v2/auth/user-info', {
       onResponse({ response }) {
         if (response.ok) {
           userData.value = response._data.data.record
-          return
         }
       },
     })
+    if (error.value?.data) {
+      return useRouter().replace({
+        path: '/auth/login',
+        query: { expired: 'true' },
+      })
+    }
   }
 
   const refresh = async () => {
