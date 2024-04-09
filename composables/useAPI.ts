@@ -1,33 +1,24 @@
 import type { UseFetchOptions } from '#app'
 import defu from 'defu'
 import USpin from '~/components/USpin.vue'
-type FetchOptions<T> = UseFetchOptions<T> & { timeout?: number }
 
 export const useAPI = async <T = unknown>(
   url: string | (() => string),
-  userOptions: FetchOptions<T> = {}
+  userOptions: UseFetchOptions<T> = {}
 ) => {
   const { token, refresh } = useAuth()
-  const toast = useToast()
   const config = useRuntimeConfig()
   const modal = useModal()
   const abortController = new AbortController()
-  const timeoutId = setTimeout(() => {
-    abortController.abort(
-      createError({
-        message: 'This request has been automatically aborted.',
-      })
-    )
-  }, userOptions.timeout || 10000)
-
-  const defaultOptions: FetchOptions<T> = {
+  let isRefreshed = false
+  refreshCookie('refreshToken')
+  refreshCookie('token')
+  const defaultOptions: UseFetchOptions<T> = {
     baseURL: `${config.public.baseUrl}`,
     method: 'GET',
-    retry: 1,
-    retryDelay: 500,
-    retryStatusCodes: [401],
+    signal: abortController.signal,
+    retry: 0,
     key: typeof url === 'string' ? url : url(),
-    server: false,
     onRequest({ options }) {
       if (token.value) {
         options.headers = {
@@ -38,34 +29,45 @@ export const useAPI = async <T = unknown>(
         }
       }
     },
-    async onResponse({ response }) {
+    async onResponse({ response, request }) {
       const hasError =
         !response.ok || response.status.toString().startsWith('4')
       if (hasError) {
-        console.log('Has error')
+        if (response.status === 401 && !isRefreshed) {
+          const newRes = await refresh()
+            .then(() => retryRequest(request, options))
+            .catch(() => {
+              navigateTo({ path: '/auth/login', query: { expired: 'true' } })
+            })
+          isRefreshed = true
+          return newRes
+        }
       }
     },
 
-    async onResponseError({ response }) {
-      if (response.status === 401) {
-        const { error } = await refresh()
-        if (error.value) {
-          this.retry = 0
-        }
+    async onResponseError({ response, request }) {
+      if (response.status === 401 && !isRefreshed) {
+        const newRes = await refresh()
+          .then(() => retryRequest(request, options))
+          .catch(() => {
+            navigateTo({ path: '/auth/login', query: { expired: 'true' } })
+          })
+        isRefreshed = true
+        return newRes
       }
-      if (response.status.toString().startsWith('5')) {
-        toast.add({ title: response._data.message })
-      }
+      // throw createError({
+      //   statusCode: response.status,
+      //   statusMessage: response._data.message,
+      //   message: response._data.error,
+      // })
     },
   }
 
   const options = defu(userOptions, defaultOptions)
   modal.open(USpin)
-  return useFetch(url, options)
-    .finally(() => {
-      if (timeoutId) {
-        clearTimeout(timeoutId)
-      }
-    })
-    .finally(() => modal.close())
+
+  return useFetch(url, options).finally(() => {
+    isRefreshed = false
+    return modal.close()
+  })
 }

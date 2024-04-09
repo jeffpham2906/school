@@ -1,5 +1,5 @@
 <template>
-  <div class="flex justify-between items-center gap-2">
+  <div class="grid grid-cols-2 items-center gap-2">
     <ULabel :label="label" />
     <slot />
   </div>

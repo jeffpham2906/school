@@ -1,31 +1,18 @@
-import type { Teacher } from '~/types/teacher.types'
+import type { Data, GetData, GetOne } from '~/types'
+import { type Teacher } from '~/types/teacher.types'
 
-export interface GetAllTeachersProps {
-  limit: number
-  page: number
-  'filter[gender]'?: string | null
-  'filter[type]'?: string | null
-  'filter[status]'?: string | null
-  search?: string
-}
+export const getAllTeachers = () => {
+  const { queries } = useQuery()
 
-export const getAllTeachers = (queries?: Ref<GetAllTeachersProps>) => {
-  return useAPI('/teachers', {
-    query: queries,
+  return useAPI<Data<GetData<Teacher>, Error>>('/teachers', {
+    pick: ['data'],
     watch: queries ? [queries] : false,
-    timeout: 7000,
-    immediate: false,
-  })
-}
-
-export const getTeacher = (id: string | undefined) => {
-  return useAPI(`/teachers/${id}`, {
-    immediate: false,
+    query: queries,
   })
 }
 
 export const createTeacher = (data: Teacher) => {
-  return useAPI(`/teachers`, {
+  return useAPI<GetOne<Teacher>>(`/teachers`, {
     method: 'POST',
     body: {
       record: data,
@@ -34,8 +21,9 @@ export const createTeacher = (data: Teacher) => {
   })
 }
 
-export const updateTeacher = (data: object, id: string) => {
-  return useAPI(`/teachers/${id}`, {
+export const updateTeacher = (data: object) => {
+  const id = computed(() => useRoute().params.id)
+  return useAPI<GetOne<Teacher>>(`/teachers/${id.value}`, {
     method: 'PATCH',
     body: {
       record: data,
@@ -47,25 +35,5 @@ export const updateTeacher = (data: object, id: string) => {
 export const deleteTeacher = async (id: string) => {
   return useAPI(`/teachers/${id}`, {
     method: 'DELETE',
-    async onResponse({ response }) {
-      if (response.ok) {
-        useToast().add({
-          title: 'Xoá thành công',
-          timeout: 2500,
-          icon: 'i-heroicons-check-circle',
-        })
-      }
-    },
-    onRequestError({ response }) {
-      console.log('errr', response)
-      if (response?._data) {
-        useToast().add({
-          title: response._data.message,
-          icon: 'i-heroicons-x-circle',
-          color: 'red',
-          timeout: 2500,
-        })
-      }
-    },
   })
 }

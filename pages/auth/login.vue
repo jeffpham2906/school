@@ -47,8 +47,7 @@ const form = ref()
 const { signIn, isLoggedIn } = useAuth()
 const route = useRoute()
 const onSubmit = async (event: FormSubmitEvent<UserLogin>) => {
-  const { execute, error } = await signIn(event.data, route.query.redirect_url)
-  await execute()
+  const { error } = await signIn(event.data, route.query.redirect_url)
   if (error.value) {
     form.value.setErrors([{ path: 'username', message: error.value.message }])
   }
@@ -60,7 +59,6 @@ const onError = async (event: FormErrorEvent) => {
   element?.scrollIntoView({ behavior: 'smooth', block: 'center' })
 }
 onMounted(async () => {
-  console.log(isLoggedIn.value)
   if (isLoggedIn.value) {
     return await navigateTo(String(route.query.redirect_url ?? '/'))
   }

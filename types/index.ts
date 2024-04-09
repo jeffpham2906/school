@@ -1,23 +1,44 @@
+import type { LocationQueryValue } from 'vue-router'
+
 export * from './auth.types'
-export interface GetResponseData<T> {
+
+export interface Error {
+  status: number
+}
+export interface Data<T, U> {
+  status: number
+  message: string
+  data: T
+  error: U
+}
+export interface GetData<T> {
   items: T[]
   limit: number
   page: number
+  sort: Sort
   total: number
+  hasNextPage: boolean
+  hasPrevPage: boolean
   totalPages: number
+  search: string | LocationQueryValue[]
+  filter: Filter
+  filterCustom: Filter
+}
+export interface GetOne<T> {
+  record: T
 }
 
-export interface Detail<T> {
-  data: { record: T }
+export interface Error {
+  issues: Issue[]
 }
 
-export const phoneRegex =
-  /^((\+[1-9]{1,4}[ -]?)|(\([0-9]{2,3}\)[ -]?)|([0-9]{2,4})[ -]?)*?[0-9]{3,4}[ -]?[0-9]{3,4}$/
-
-export interface FileData {
-  filename?: string
-  ext?: string
-  key?: string
-  bucket?: string
-  url?: string
+export interface Issue {
+  code: string
+  message: string
+  path: string[]
 }
+
+export interface Sort {
+  _id: number
+}
+export interface Filter {}

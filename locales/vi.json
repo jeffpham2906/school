@@ -9,7 +9,7 @@
   "classCode": "Mã lớp học",
   "name": "Tên",
   "gender": "Giới tính",
-  "phone": "SĐT",
+  "phone": "Số điện thoại",
   "type": "Loại",
   "status": "Trạng thái",
   "view_detail": "Xem chi tiết",
@@ -41,12 +41,16 @@
   "nationality": "Quốc tịch",
   "healthInsuranceNumber": "Số bảo hiểm",
   "passport": "Số CCCD/CMND",
-  "permanentResidence": "Địa chỉ thường trú",
-  "currentAddress": "Địa chỉ hiện nay",
+  "permanentResidence": "Hộ khẩu thường trú",
+  "currentAddress": "Chỗ ở hiện nay",
   "vietnam": "Việt Nam",
   "select_status": "Chọn trạng thái",
   "select_gender": "Chọn giới tính",
   "students_title": "Danh sách học sinh",
   "classes_title": "Danh sách lớp học",
-  "selected": "đã chọn"
+  "selected": "đã chọn",
+  "confirm_delete": "Bạn có chắc chắn xoá",
+  "teacher": "giáo viên",
+  "personal_infor": "Thông tin cá nhân",
+  "general_infor": "Thông tin chung"
 }

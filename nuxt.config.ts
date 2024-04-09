@@ -9,7 +9,7 @@ export default defineNuxtConfig({
     },
   },
   imports: {
-    dirs: ['./stores', './services'],
+    dirs: ['stores', 'services', 'utils'],
   },
   colorMode: {
     preference: 'light',
@@ -33,7 +33,7 @@ export default defineNuxtConfig({
         file: 'vi.json',
       },
     ],
-    defaultLocale: 'en-US',
+    defaultLocale: 'vi-VN',
   },
   ui: {
     global: true,

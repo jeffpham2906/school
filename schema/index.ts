@@ -1,8 +1,11 @@
 import * as yup from 'yup'
-import { phoneRegex } from '~/types'
+
 import type { Gender, Status, Teacher, Type } from '~/types/teacher.types'
+const phoneRegex =
+  /^((\+[1-9]{1,4}[ -]?)|(\([0-9]{2,3}\)[ -]?)|([0-9]{2,4})[ -]?)*?[0-9]{3,4}[ -]?[0-9]{3,4}$/
 
 export const teacherSchema = yup.object<Teacher>({
+  teacherCode: yup.string().required('Vui lòng nhập'),
   name: yup.string().required('Vui lòng nhập tên'),
   avatar: yup.mixed(),
   email: yup
@@ -19,7 +22,7 @@ export const teacherSchema = yup.object<Teacher>({
   nationality: yup.string(),
   healthInsuranceNumber: yup.string(),
   passport: yup.string().required('Vui lòng nhập CMT/CCCD'),
-  permanentResidence: yup.string().required('Vui lòng nhập địa chỉ'),
+  permanentResidence: yup.string().required('Vui lòng nhập hộ khẩu'),
   currentAddress: yup.string().required('Vui lòng nhập địa chỉ'),
   note: yup.string(),
   status: yup.string<Status>(),

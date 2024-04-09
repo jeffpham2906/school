@@ -1,11 +1,11 @@
 import type { Teacher } from '~/types/teacher.types'
 
-export default function getDiffObject(srcObj: Teacher, targetObj: Teacher) {
+export default function getDiffObject<T>(srcObj: T, targetObj: T) {
   const diff = {}
 
   for (const key in targetObj) {
     if (Object.prototype.hasOwnProperty.call(srcObj, key)) {
-      if (srcObj[key as keyof Teacher] !== targetObj[key as keyof Teacher]) {
+      if (srcObj[key as keyof T] !== targetObj[key as keyof T]) {
         //@ts-expect-error Key
         diff[key] = targetObj[key as keyof Teacher]
       }

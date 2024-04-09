@@ -69,6 +69,6 @@ watch(labelSelected, () => {
   if (!labelSelected.value.length) {
     delete filterObj[oneKeyValue]
   }
-  router.replace({ path: route.fullPath, query: filterObj })
+  router.push({ query: { ...filterObj, page: 1 } })
 })
 </script>

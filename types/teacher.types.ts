@@ -1,27 +1,66 @@
-import type { FileData } from '.'
-
-export type Gender = 'male' | 'female' | 'other'
-export type Type = 'official' | 'contract' | 'parttime'
-export type Status = 'active' | 'disabled'
-
 export interface Teacher {
-  avatar?: FileData //optional
-  teacherCode?: string //Mã giáo viên //Không cần gửi
-  contracts?: FileData[] //Hợp đồng //optional
-  email: string //Email //require
-  phone: string //Phone //require
-  dateOfBirth?: Date //Ngày sinh //optional
-  name: string //Tên //require
-  slug?: string //SLug //Không cần gửi
-  gender?: Gender //"male" | "female" | "other"; // Giới tính //optional
-  nationality?: string //Quốc tịch //optional
-  healthInsuranceNumber?: string //Số thẻ BHYT //optional
-  passport: string //Số chứng minh thư nhân dân //require
-  currentClassId?: string //Mã lớp học //optional
-  pastClassIds?: string[] //optional
-  permanentResidence: string // Hộ khẩu thường trú //require
-  currentAddress: string // Chỗ ở hiện tại //require
-  note?: string //Ghi trú //optional
-  type: Type //"official" | "contract" | "parttime"; //loại //require
-  status?: Status //"active" | "disabled"; //Trạng thái //optional
+  name: string
+  slug?: string
+  teacherCode?: string
+  email: string
+  phone: string
+  gender?: Gender
+  nationality?: string
+  passport: string
+  healthInsuranceNumber: string
+  permanentResidence: string
+  currentAddress: string
+  currentClassId?: string
+  pastClassIds?: string[]
+  status: Status
+  type: Type
+  note: string
+  createdById?: string
+  createdBy?: AtedBy
+  contracts?: Avatar[]
+  createdAt?: Date
+  updatedAt?: Date
+  syncStatus?: string
+  dateOfBirth?: Date
+  updatedBy?: AtedBy
+  updatedById?: string
+  id?: string
+  avatar?: Avatar
+}
+
+export interface Avatar {
+  key: string
+  bucket: string
+  url: string
+  ext: string
+  filename: string
+  _id?: string
+}
+
+export interface AtedBy {
+  username: string
+  role: string
+  parentId: string
+  status: Status
+  createdAt: Date
+  updatedAt: Date
+  syncStatus: string
+  id: string
+}
+
+export enum Status {
+  Active = 'active',
+  Disabled = 'disabled',
+}
+
+export enum Gender {
+  Female = 'female',
+  Male = 'male',
+  Other = 'other',
+}
+
+export enum Type {
+  Contract = 'contract',
+  Official = 'official',
+  Parttime = 'parttime',
 }

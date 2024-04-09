@@ -8,8 +8,17 @@
       divide: '',
     }"
   >
-    <PopUp v-model="isPopupOpen" @onLeftClick="handleDeleteTeacher" />
-    <TeacherModel v-if="isOpen" v-model="isOpen" :refresh-fc="refresh" />
+    <PopUp v-model="isPopupOpen" @onLeftClick="handleDeleteTeacher">
+      <template #message>
+        {{ `${$t('confirm_delete')} ${$t('teacher')}` }}
+      </template>
+    </PopUp>
+    <CreateTeacher v-model="isCreateFormOpen" :refresh-fc="refresh" />
+    <DetailScreen
+      v-if="isDetailSceenOpen"
+      v-model="isDetailSceenOpen"
+      :refresh-fc="refresh"
+    />
     <template #header>
       <HeaderPage>{{ $t('listTeachers') }}</HeaderPage>
     </template>
@@ -32,12 +41,7 @@
         :label="$t('add')"
         icon="i-heroicons-plus"
         :trailing="true"
-        @click="
-          () => {
-            isOpen = true
-            $route.query.status = 'add'
-          }
-        "
+        @click="isCreateFormOpen = true"
       />
     </div>
     <UTable :columns="columns" :rows="dataTable" :loading="pending">
@@ -110,24 +114,24 @@
           <UPagination
             v-model="page"
             :page-count="1"
-            :total="totalPages"
+            :total="teacherData?.data.totalPages"
             :max="5"
             size="xs"
           />
           <span class="text-sm">
-            {{
-              `${$t('show_from')} ${pageFrom} ${$t('to')} ${pageTo} ${$t('on')} ${totalResults} ${$t('results')}`
-            }}
+            <span v-show="!!teacherData?.data.total">
+              {{
+                `${$t('show_from')} ${pageFrom} ${$t('to')} ${pageTo} ${$t('on')}`
+              }}
+            </span>
+            <span>
+              {{ ` ${teacherData?.data.total ?? 0} ${$t('results')}` }}
+            </span>
           </span>
         </div>
         <span class="flex items-center gap-1.5 text-sm">
           {{ $t('rows_per_page') }}
-          <USelectMenu
-            :options="[10, 20, 50]"
-            placeholder="10"
-            size="xs"
-            v-model="limit"
-          />
+          <USelectMenu v-model="limit" :options="[10, 20, 50]" size="xs" />
         </span>
       </div>
     </template>
@@ -135,77 +139,75 @@
 </template>
 
 <script setup lang="ts">
-import type { AsyncData } from '#app'
-import USpin from '~/components/USpin.vue'
-import { useQuery } from '~/composables/useQuery'
 import { deleteTeacher, getAllTeachers } from '~/services/teachers'
-import type { GetResponseData } from '~/types'
-import type { Teacher } from '~/types/teacher.types'
 
 definePageMeta({
   layout: 'applayout',
 })
 const route = useRoute()
-const modal = useModal()
-const isOpen = ref(false)
-
-const isPopupOpen = ref(false)
-const searchQuery = ref(route.query.search || '')
+const router = useRouter()
+const isCreateFormOpen = ref(false)
+const isDetailSceenOpen = ref(false)
 const deleteId = ref('')
+const isPopupOpen = ref(false)
 
-const { queries, setRoute } = useQuery()
-const page = ref(Number(route.query?.page) || 1)
-watch(page, () => {
-  setRoute({ page: page.value, limit: limit.value })
-})
-const limit = ref(Number(route.query?.limit) || 10)
-watch(limit, async () => {
-  useRouter().replace({
-    path: route.fullPath,
-    query: { limit: limit.value, page: 1 },
-  })
-  page.value = 1
-})
 // Fetch Data
-const { data, refresh, pending } = (await getAllTeachers(queries)) as AsyncData<
-  { data: GetResponseData<Teacher> },
-  unknown
->
-const dataTable = computed(() => data.value?.data.items || [])
-const totalPages = computed(() => data.value?.data.totalPages || 1)
-const totalResults = computed(() => data.value?.data.total || 0)
-const pageFrom = computed(
-  () => (page.value - 1) * (Number(route.query.limit) || 10) + 1 || 0
-)
-const pageTo = computed(
-  () =>
-    Math.min(
-      page.value * (Number(route.query.limit) || 10),
-      totalResults.value
-    ) || ''
+const { data: teacherData, refresh, pending } = await getAllTeachers()
+const searchQuery = computed({
+  get: () => teacherData.value?.data.search ?? (route.query.search || ''),
+  set: (newValue) => {
+    if (teacherData.value) {
+      teacherData.value.data.search = newValue
+    }
+    const queryObj = {
+      ...route.query,
+      search: newValue,
+      page: 1,
+    }
+    // @ts-expect-error key
+    if (!newValue) delete queryObj.search
+    router.push({ query: queryObj })
+  },
+})
+const page = computed({
+  get: () => teacherData.value?.data.page ?? 1,
+  set: (newValue) => {
+    router.push({ query: { ...route.query, page: newValue } })
+  },
+})
+const limit = computed({
+  get: () => teacherData.value?.data.limit ?? 10,
+  set: (newValue) => {
+    router.push({ query: { ...route.query, limit: newValue, page: 1 } })
+  },
+})
+
+const dataTable = computed(() => teacherData.value?.data.items || [])
+const pageFrom = computed(() => (page.value - 1) * limit.value + 1 || 0)
+const pageTo = computed(() =>
+  Math.min(page.value * limit.value, teacherData.value?.data.total ?? 1)
 )
 
 const handleDeleteTeacher = async () => {
-  modal.open(USpin)
   await deleteTeacher(deleteId.value)
     .then(() => refresh())
     .finally(() => {
       deleteId.value = ''
       isPopupOpen.value = false
-      modal.close()
     })
 }
 
-const handleActionClick = (action: string, id: string) => {
+const handleActionClick = async (action: string, id: string) => {
   switch (action) {
     case 'detail':
       route.params.id = id
-      route.query.status = 'detail'
-      return (isOpen.value = true)
+      isDetailSceenOpen.value = true
+      return
     case 'change':
       route.params.id = id
-      route.query.status = 'change'
-      return (isOpen.value = true)
+      route.params.method = 'edit'
+      isDetailSceenOpen.value = true
+      return
     case 'delete':
       deleteId.value = id
       return (isPopupOpen.value = true)

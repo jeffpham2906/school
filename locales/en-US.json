@@ -48,5 +48,7 @@
   "select_gender": "Select a gender",
   "students_title": "Students",
   "classes_title": "Classes",
-  "selected": "selected"
+  "selected": "selected",
+  "confirm_delete": "Are you sure to remove",
+  "teacher": "teacher"
 }

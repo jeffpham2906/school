@@ -1,17 +1,5 @@
 export const useQuery = () => {
   const route = useRoute()
-  const router = useRouter()
-
-  const setRoute = (field: object, clearLabel?: string | string[]) => {
-    const newRoute = { ...route.query, ...field }
-    if (clearLabel === '' || clearLabel) {
-      const key = Object.getOwnPropertyNames(field)[0]
-      if (clearLabel.includes(String(newRoute[key]))) {
-        delete newRoute[key]
-      }
-    }
-    router.push({ path: route.fullPath, query: newRoute })
-  }
 
   const queries = ref()
   watch(
@@ -23,6 +11,5 @@ export const useQuery = () => {
   onMounted(() => (queries.value = route.query))
   return {
     queries,
-    setRoute,
   }
 }
