@@ -2,7 +2,7 @@ import type { LocationQueryValue } from 'vue-router'
 import type { UserData, UserLogin } from '~/types'
 export const useAuth = () => {
   const userData = useState<UserData | null>('userData', () => null)
-  const isLoggedIn = computed(() => !!userData.value)
+  const isLoggedIn = computed(() => !!(token.value || refreshToken.value))
   const token = useCookie('token', { sameSite: 'lax' })
   const refreshToken = useCookie('refreshToken', { sameSite: 'lax' })
 
@@ -29,20 +29,14 @@ export const useAuth = () => {
     })
   }
 
-  const getUser = async () => {
-    const { error } = await useAPI('/v2/auth/user-info', {
+  const getUser = () => {
+    return useAPI('/v2/auth/user-info', {
       onResponse({ response }) {
         if (response.ok) {
           userData.value = response._data.data.record
         }
       },
     })
-    if (error.value?.data) {
-      return useRouter().replace({
-        path: '/auth/login',
-        query: { expired: 'true' },
-      })
-    }
   }
 
   const refresh = async () => {
@@ -58,6 +52,21 @@ export const useAuth = () => {
           refreshToken.value = response._data.data.tokens.refresh.token
           userData.value = response._data.data.user
         }
+      },
+      onResponseError({ response }) {
+        token.value = null
+        refreshToken.value = null
+        const queryObj = {
+          redirect_url: useRoute().fullPath,
+        }
+        if (response.status === 401) {
+          queryObj.expired = 'true'
+          queryObj.message = response._data.message
+        }
+        navigateTo({
+          path: '/auth/login',
+          query: queryObj,
+        })
       },
     })
   }

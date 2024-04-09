@@ -59,8 +59,8 @@ const onError = async (event: FormErrorEvent) => {
   element?.scrollIntoView({ behavior: 'smooth', block: 'center' })
 }
 onMounted(async () => {
-  if (route.query.expired === 'true' && route.fullPath.startsWith('/auth')) {
-    useToast().add({ title: 'Phiên đăng nhập đã hết hạn', timeout: 2000 })
+  if (route.query.expired === 'true') {
+    useToast().add({ title: '' + route.query.message, timeout: 2000 })
     return
   }
 })

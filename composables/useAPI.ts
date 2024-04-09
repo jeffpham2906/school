@@ -10,14 +10,14 @@ export const useAPI = async <T = unknown>(
   const config = useRuntimeConfig()
   const modal = useModal()
   const abortController = new AbortController()
-  let isRefreshed = false
-  refreshCookie('refreshToken')
-  refreshCookie('token')
+  const refreshFunc = throttle(refresh, 500)
+
   const defaultOptions: UseFetchOptions<T> = {
     baseURL: `${config.public.baseUrl}`,
     method: 'GET',
     signal: abortController.signal,
-    retry: 0,
+    retry: 1,
+    retryStatusCodes: [401],
     key: typeof url === 'string' ? url : url(),
     onRequest({ options }) {
       if (token.value) {
@@ -29,31 +29,19 @@ export const useAPI = async <T = unknown>(
         }
       }
     },
-    async onResponse({ response, request }) {
+    async onResponse({ response }) {
       const hasError =
         !response.ok || response.status.toString().startsWith('4')
       if (hasError) {
-        if (response.status === 401 && !isRefreshed) {
-          const newRes = await refresh()
-            .then(() => retryRequest(request, options))
-            .catch(() => {
-              navigateTo({ path: '/auth/login', query: { expired: 'true' } })
-            })
-          isRefreshed = true
-          return newRes
+        if (response.status === 401) {
+          await refreshFunc()
         }
       }
     },
 
-    async onResponseError({ response, request }) {
-      if (response.status === 401 && !isRefreshed) {
-        const newRes = await refresh()
-          .then(() => retryRequest(request, options))
-          .catch(() => {
-            navigateTo({ path: '/auth/login', query: { expired: 'true' } })
-          })
-        isRefreshed = true
-        return newRes
+    async onResponseError({ response }) {
+      if (response.status === 401) {
+        await refreshFunc()
       }
       // throw createError({
       //   statusCode: response.status,
@@ -67,7 +55,6 @@ export const useAPI = async <T = unknown>(
   modal.open(USpin)
 
   return useFetch(url, options).finally(() => {
-    isRefreshed = false
     return modal.close()
   })
 }
