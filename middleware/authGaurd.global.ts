@@ -3,7 +3,6 @@ export default defineNuxtRouteMiddleware(async (to) => {
   if (to.fullPath.includes('/auth/login?expired=true')) {
     return
   }
-  const { getUser, isLoggedIn } = useAuth()
-  if (isLoggedIn.value) return
+  const { getUser } = useAuth()
   await getUser()
 })
