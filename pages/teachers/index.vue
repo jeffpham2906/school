@@ -44,9 +44,17 @@
         @click="isCreateFormOpen = true"
       />
     </div>
-    <UTable :columns="columns" :rows="dataTable" :loading="pending">
-      <template #teacherCode-header>
-        {{ $t('teacherCode') }}
+    <UTable
+      v-model="rowsSelected"
+      :columns="columns"
+      :rows="dataTable"
+      :loading="pending"
+      sort-asc-icon="i-heroicons-arrow-up"
+      sort-desc-icon="i-heroicons-arrow-down"
+      sort-mode="manual"
+    >
+      <template #teacherCode-header="{ column }">
+        {{ $t(column.key) }}
       </template>
       <template #name-header>
         {{ $t('name') }}
@@ -150,6 +158,7 @@ const isCreateFormOpen = ref(false)
 const isDetailSceenOpen = ref(false)
 const deleteId = ref('')
 const isPopupOpen = ref(false)
+const rowsSelected = ref([])
 
 // Fetch Data
 const { data: teacherData, refresh, pending } = await getAllTeachers()
@@ -219,24 +228,32 @@ const handleActionClick = async (action: string, id: string) => {
 const columns = [
   {
     key: 'teacherCode',
+    label: 'teacherCode',
+    sortable: true,
   },
   {
     key: 'name',
+    sortable: true,
   },
   {
     key: 'gender',
+    sortable: true,
   },
   {
     key: 'phone',
+    sortable: true,
   },
   {
     key: 'email',
+    sortable: true,
   },
   {
     key: 'type',
+    sortable: true,
   },
   {
     key: 'status',
+    sortable: true,
   },
   {
     key: 'actions',

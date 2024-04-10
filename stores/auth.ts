@@ -1,6 +1,7 @@
 import type { LocationQueryValue } from 'vue-router'
 import type { UserData, UserLogin } from '~/types'
 export const useAuth = () => {
+  const config = useRuntimeConfig()
   const userData = useState<UserData | null>('userData', () => null)
   const isLoggedIn = computed(() => !!(token.value || refreshToken.value))
   const token = useCookie('token', { sameSite: 'lax' })
@@ -8,7 +9,7 @@ export const useAuth = () => {
 
   const signIn = async (
     data: UserLogin,
-    redirect: LocationQueryValue | LocationQueryValue[] = '/'
+    redirect: LocationQueryValue | LocationQueryValue[] = '/teachers'
   ) => {
     return useAPI('/v2/auth/login', {
       method: 'POST',
@@ -40,8 +41,6 @@ export const useAuth = () => {
   }
 
   const refresh = async () => {
-    const config = useRuntimeConfig()
-
     return $fetch(`${config.public.baseUrl}/v2/auth/refresh-token`, {
       method: 'POST',
       body: { refreshToken: refreshToken.value },
@@ -71,20 +70,16 @@ export const useAuth = () => {
     })
   }
 
-  const signOut = (redirect_url: string = '') => {
+  const signOut = () => {
     return useAPI('/v2/auth/logout', {
       method: 'POST',
+      body: { accessToken: token.value, refreshToken: token.value },
       async onResponse({ response }) {
         if (response.ok) {
           userData.value = null
           token.value = null
           refreshToken.value = null
-          navigateTo({
-            path: '/auth/login',
-            query: {
-              redirect_url,
-            },
-          })
+          navigateTo('/auth/login')
         }
       },
     })

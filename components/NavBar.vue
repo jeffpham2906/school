@@ -22,19 +22,14 @@ interface Link {
 }
 const links: Link[] = [
   {
-    label: 'nav_home',
-    icon: 'i-heroicons-home',
-    to: '/',
+    label: 'nav_teachers',
+    icon: 'i-heroicons-user-group',
+    to: '/teachers',
   },
   {
     label: 'nav_students',
     icon: 'i-heroicons-academic-cap',
     to: '/students',
-  },
-  {
-    label: 'nav_teachers',
-    icon: 'i-heroicons-user-group',
-    to: '/teachers',
   },
   {
     label: 'nav_classes',

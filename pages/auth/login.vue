@@ -59,7 +59,7 @@ const onError = async (event: FormErrorEvent) => {
   element?.scrollIntoView({ behavior: 'smooth', block: 'center' })
 }
 onMounted(async () => {
-  if (isLoggedIn.value) return navigateTo('/')
+  if (isLoggedIn.value) return navigateTo('/teachers')
   if (route.query.expired === 'true') {
     useToast().add({ title: '' + route.query.message, timeout: 2000 })
     return

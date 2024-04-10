@@ -1,5 +1,5 @@
 <template>
-  <USlideover v-model="isOpen" :ui="{ width: 'max-w-7xl' }" prevent-close>
+  <USlideover v-model="isOpen" :ui="{ width: 'max-w-6xl' }">
     <UCard
       class="flex flex-col flex-1"
       :ui="{
@@ -33,14 +33,14 @@
         @error="onError"
         ref="form"
         :validateOn="['submit']"
-        class="h-full"
+        class="h-full max-h-[600px]"
       >
-        <div class="h-full grid grid-rows-[1fr,0.9fr]">
+        <div class="h-full grid grid-rows-2">
           <div
-            class="grid grid-cols-7 grid-rows-[auto,1fr,1fr,1fr,1fr] h-full items-center gap-x-10"
+            class="grid grid-cols-[150px,1fr,1fr,1fr] grid-rows-[auto,1fr,1fr,1fr,1fr] h-full items-center gap-x-10"
           >
-            <h1 class="col-start-1 col-end-8">{{ $t('personal_infor') }}</h1>
-            <div class="row-start-2 row-end-6 justify-center flex">
+            <h1 class="col-start-1 col-end-5">{{ $t('personal_infor') }}</h1>
+            <div class="row-start-2 row-end-7 justify-center flex">
               <UAvatar
                 :src="teacher?.avatar?.url"
                 :ui="{
@@ -75,197 +75,185 @@
                 </div>
               </UAvatar>
             </div>
-            <ULabel :label="$t('teacherCode')" />
-            <UFormGroup name="teacherCode">
+            <UInlineFormGroup :label="$t('teacherCode')">
               <UInput v-model="teacher.teacherCode" :disabled="!isEdit" />
-              <template #error="{ error }">
-                <span class="absolute">{{ error }}</span>
-              </template>
-            </UFormGroup>
-            <ULabel :label="$t('gender')" name="gender" />
-            <ISelect
-              v-model="teacher.gender"
-              :options="['male', 'female', 'other']"
-              :placeholder="$t('select_gender')"
-              :disabled="!isEdit"
-            >
-              <template #labelValue>
-                {{ $t(teacher.gender || 'select_gender') }}
-              </template>
-            </ISelect>
-            <ULabel label="Email" />
-            <UFormGroup name="email">
-              <UInput v-model="teacher.email" :disabled="!isEdit" />
-              <template #error="{ error }">
-                <span class="absolute">{{ error }}</span>
-              </template>
-            </UFormGroup>
-            <ULabel :label="$t('name')" />
-            <UFormGroup name="name">
-              <UInput v-model="teacher.name" :disabled="!isEdit" />
-              <template #error="{ error }">
-                <span class="absolute">{{ error }}</span>
-              </template>
-            </UFormGroup>
-            <ULabel :label="$t('nationality')" />
-            <UInput v-model="teacher.nationality" :disabled="!isEdit" />
-            <ULabel :label="$t('phone')" />
-            <UFormGroup name="phone">
-              <UInput v-model="teacher.phone" :disabled="!isEdit" />
-              <template #error="{ error }">
-                <span class="absolute">{{ error }}</span>
-              </template>
-            </UFormGroup>
-            <ULabel :label="$t('date_of_birth')" />
-            <UPopover>
-              <UButton
-                icon="i-heroicons-calendar-days-20-solid"
-                :label="
-                  format(
-                    new Date(teacher.dateOfBirth || new Date()),
-                    'd MMM, yyy'
-                  )
-                "
-                color="gray"
-                class="w-full"
+            </UInlineFormGroup>
+            <UInlineFormGroup :label="$t('gender')" name="gender">
+              <ISelect
+                v-model="teacher.gender"
+                :options="['male', 'female', 'other']"
+                :placeholder="$t('select_gender')"
                 :disabled="!isEdit"
-              />
-              <template #panel="{ close }">
-                <DatePicker
-                  v-model:model-value="teacher.dateOfBirth"
-                  @close="close"
+              >
+                <template #labelValue>
+                  {{ $t(teacher.gender || 'select_gender') }}
+                </template>
+              </ISelect>
+            </UInlineFormGroup>
+            <UInlineFormGroup label="Email" name="email" required>
+              <UInput v-model="teacher.email" :disabled="!isEdit" />
+            </UInlineFormGroup>
+            <UInlineFormGroup :label="$t('name')" name="name" required>
+              <UInput v-model="teacher.name" :disabled="!isEdit" />
+            </UInlineFormGroup>
+            <UInlineFormGroup :label="$t('nationality')">
+              <UInput v-model="teacher.nationality" :disabled="!isEdit" />
+            </UInlineFormGroup>
+            <UInlineFormGroup :label="$t('phone')" name="phone" required>
+              <UInput v-model="teacher.phone" :disabled="!isEdit" />
+            </UInlineFormGroup>
+            <UInlineFormGroup :label="$t('date_of_birth')">
+              <UPopover>
+                <UButton
+                  icon="i-heroicons-calendar-days-20-solid"
+                  :label="
+                    format(
+                      new Date(teacher.dateOfBirth || new Date()),
+                      'd MMM, yyy'
+                    )
+                  "
+                  color="gray"
+                  class="w-full"
+                  :disabled="!isEdit"
                 />
-              </template>
-            </UPopover>
-            <ULabel :label="$t('permanentResidence')" />
-            <div class="col-start-5 col-end-8">
-              <UFormGroup name="permanentResidence">
+                <template #panel="{ close }">
+                  <DatePicker
+                    v-model:model-value="teacher.dateOfBirth"
+                    @close="close"
+                  />
+                </template>
+              </UPopover>
+            </UInlineFormGroup>
+            <div class="col-start-3 col-end-5">
+              <UInlineFormGroup
+                :label="$t('permanentResidence')"
+                name="permanentResidence"
+                required
+              >
                 <UInput
+                  class="w-3/5"
                   v-model="teacher.permanentResidence"
-                  class="w-full max-w-80"
                   :disabled="!isEdit"
                 />
-                <template #error="{ error }">
-                  <span class="absolute">{{ error }}</span>
-                </template>
-              </UFormGroup>
+              </UInlineFormGroup>
             </div>
-            <ULabel :label="$t('passport')" />
-            <UFormGroup name="passport">
+            <UInlineFormGroup :label="$t('passport')" name="passport" required>
               <UInput v-model="teacher.passport" :disabled="!isEdit" />
-              <template #error="{ error }">
-                <span class="absolute">{{ error }}</span>
-              </template>
-            </UFormGroup>
-            <ULabel :label="$t('currentAddress')" />
-            <div class="col-start-5 col-end-8">
-              <UFormGroup name="currentAddress">
+            </UInlineFormGroup>
+            <div class="col-start-3 col-end-5">
+              <UInlineFormGroup
+                :label="$t('currentAddress')"
+                name="currentAddress"
+                required
+              >
                 <UInput
+                  class="w-3/5"
                   v-model="teacher.currentAddress"
-                  class="w-full max-w-80"
                   :disabled="!isEdit"
                 />
-                <template #error="{ error }">
-                  <span class="absolute">{{ error }}</span>
-                </template>
-              </UFormGroup>
+              </UInlineFormGroup>
             </div>
           </div>
           <div
-            class="grid grid-cols-7 grid-rows-[30px,1fr,1fr,1fr] items-center"
+            class="grid grid-cols-[150px,1fr,1fr,1fr] grid-rows-[24px,auto,auto,1fr] gap-x-10 gap-y-6"
           >
-            <h1 class="col-start-1 col-end-8">{{ $t('general_infor') }}</h1>
-            <div></div>
-            <ULabel :label="$t('type')" />
-            <ISelect
-              v-model="teacher.type"
-              :options="['official', 'contract', 'parttime']"
-              :disabled="!isEdit"
-            >
-              <template #labelValue>
-                {{ $t(teacher.type) }}
-              </template>
-            </ISelect>
-            <div></div>
-            <ULabel :label="$t('status')" />
-            <ISelect
-              v-model="teacher.status"
-              :options="['active', 'disabled']"
-              :disabled="!isEdit"
-            >
-              <template #labelValue>
-                {{ $t(teacher.status) }}
-              </template>
-            </ISelect>
-            <div></div>
-            <div></div>
-            <ULabel :label="$t('note')" />
-            <UTextarea
-              v-model="teacher.note"
-              :disabled="!isEdit"
-              class="col-start-3 col-end-4 row-start-3 row-end-5"
-            />
-            <div></div>
-            <ULabel :label="$t('contracts')" />
-            <UFormGroup
-              name="contracts"
-              :ui="{ hint: 'cursor-pointer text-gray-500 dark:text-gray-200' }"
-            >
-              <UDropdown
-                :items="[teacher?.contracts]"
-                :ui="{
-                  wrapper: 'w-full',
-                  item: {
-                    base: 'justify-between',
-                  },
-                }"
+            <h1 class="col-start-1 col-end-5">{{ $t('general_infor') }}</h1>
+            <div class="row-start-2 row-end-4"></div>
+            <UInlineFormGroup :label="$t('type')">
+              <ISelect
+                v-model="teacher.type"
+                :options="['official', 'contract', 'parttime']"
+                :disabled="!isEdit"
               >
-                <UButton
-                  variant="outline"
-                  color="gray"
-                  block
-                  class="text-sm text-gray-900 dark:text-white"
+                <template #labelValue>
+                  {{ $t(teacher.type) }}
+                </template>
+              </ISelect>
+            </UInlineFormGroup>
+
+            <div class="col-start-3 col-end-5 items-center flex pl-[136px]">
+              <UInlineFormGroup :label="$t('status')">
+                <ISelect
+                  v-model="teacher.status"
+                  :options="['active', 'disabled']"
+                  :disabled="!isEdit"
+                  class="w-[142px]"
+                >
+                  <template #labelValue>
+                    {{ $t(teacher.status) }}
+                  </template>
+                </ISelect>
+              </UInlineFormGroup>
+            </div>
+
+            <UInlineFormGroup :label="$t('note')">
+              <UTextarea v-model="teacher.note" :disabled="!isEdit" />
+            </UInlineFormGroup>
+
+            <div
+              class="col-start-3 col-end-5 flex items-center gap-4 pl-[136px]"
+            >
+              <UInlineFormGroup :label="$t('contracts')" name="contracts">
+                <UDropdown
+                  :items="[teacher?.contracts]"
                   :ui="{
-                    color: {
-                      gray: {
-                        outline:
-                          'ring-1 ring-inset ring-gray-300 dark:ring-gray-700 focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400',
-                      },
+                    wrapper: 'w-full',
+                    item: {
+                      base: 'justify-between',
                     },
                   }"
-                  :label="`${$t('all')} (${teacher?.contracts?.length || '0'})`"
-                />
-                <template #item="{ item }">
-                  <ULink :to="item.url" target="_blank" class="truncate">
-                    {{ item.filename }}
-                  </ULink>
+                  class="w-[142px]"
+                >
                   <UButton
-                    icon="i-heroicons-x-mark"
+                    variant="outline"
                     color="gray"
-                    variant="ghost"
-                    @click="handleDeleteContract(item)"
-                    v-if="isEdit"
+                    block
+                    class="text-sm text-gray-900 dark:text-white"
+                    :ui="{
+                      color: {
+                        gray: {
+                          outline:
+                            'ring-1 ring-inset ring-gray-300 dark:ring-gray-700 focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400',
+                        },
+                      },
+                    }"
+                    :label="`${$t('all')} (${teacher?.contracts?.length || '0'})`"
                   />
-                </template>
-              </UDropdown>
-            </UFormGroup>
-            <div class="flex items-center justify-center" v-if="isEdit">
-              <div @click="fileContracts.click()">
-                <label>
-                  <UButton
-                    icon="i-heroicons-plus"
-                    label="Upload"
-                    color="gray"
+                  <template #item="{ item }">
+                    <ULink :to="item.url" target="_blank" class="truncate">
+                      {{ item.filename }}
+                    </ULink>
+                    <UButton
+                      icon="i-heroicons-x-mark"
+                      color="gray"
+                      variant="ghost"
+                      @click="handleDeleteContract(item)"
+                      v-if="isEdit"
+                    />
+                  </template>
+                </UDropdown>
+              </UInlineFormGroup>
+              <div
+                class="flex items-center justify-center mt-1"
+                v-show="isEdit"
+              >
+                <div @click="fileContracts.click()">
+                  <label>
+                    <UButton
+                      icon="i-heroicons-plus"
+                      label="Upload"
+                      color="gray"
+                    />
+                  </label>
+                  <input
+                    type="file"
+                    @change="handleFileChange($event, 'contracts')"
+                    accept=".jpg, .jpeg, .png, .doc, .docx, .pdf"
+                    class="absolute inset-0 opacity-80"
+                    hidden
+                    ref="fileContracts"
                   />
-                </label>
-                <input
-                  type="file"
-                  @change="handleFileChange($event, 'contracts')"
-                  accept=".jpg, .jpeg, .png, .doc, .docx, .pdf"
-                  class="absolute inset-0 opacity-80"
-                  hidden
-                  ref="fileContracts"
-                />
+                </div>
               </div>
             </div>
           </div>

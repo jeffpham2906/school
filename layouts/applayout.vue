@@ -13,8 +13,11 @@
         <UIcon
           name="i-heroicons-arrow-left-on-rectangle"
           class="w-6 h-6 rotate-180 cursor-pointer"
-          @click="signOut"
+          @click="isOpenConfirmSignOut = true"
         />
+        <PopUp v-model="isOpenConfirmSignOut" @on-left-click="signOut">
+          Bạn có chắc chắn đăng xuất?
+        </PopUp>
         <DarkMode />
         <USelectMenu
           v-model="language"
@@ -47,6 +50,7 @@
 <script setup lang="ts">
 const { userData, signOut } = useAuth()
 const { locale, locales, setLocale } = useI18n()
+const isOpenConfirmSignOut = ref(false)
 const language = computed({
   get: () => locale.value,
   set: (value) => {

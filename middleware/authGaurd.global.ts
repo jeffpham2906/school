@@ -1,4 +1,4 @@
-const USER_SHOULD_LOGGED_IN = ['/', '/teachers', '/classes', '/students']
+const USER_SHOULD_LOGGED_IN = ['/teachers', '/classes', '/students']
 export default defineNuxtRouteMiddleware(async (to, from) => {
   if (process.server) return
   if (to.fullPath.includes('/auth/login?expired=true')) {
