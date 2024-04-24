@@ -1,17 +1,15 @@
 <template>
-  <div>
-    <UVerticalNavigation
-      :links="links"
-      class="w-36"
-      :ui="{ base: 'gap-2.5 mb-2', size: 'text-base' }"
-    >
-      <template #default="{ link }">
-        <span class="group-hover:text-primary relative">
-          {{ $t(link.label) }}
-        </span>
-      </template>
-    </UVerticalNavigation>
-  </div>
+  <UVerticalNavigation
+    :links="links"
+    class="w-36"
+    :ui="{ base: 'gap-2.5 mb-2', size: 'text-base' }"
+  >
+    <template #default="{ link }">
+      <span class="group-hover:text-primary relative">
+        {{ $t(link.label) }}
+      </span>
+    </template>
+  </UVerticalNavigation>
 </template>
 
 <script setup lang="ts">

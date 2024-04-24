@@ -64,3 +64,10 @@ export enum Type {
   Official = 'official',
   Parttime = 'parttime',
 }
+
+export enum Action {
+  Create = 'create',
+  Detail = 'detail',
+  Change = 'change',
+  Delete = 'delete',
+}

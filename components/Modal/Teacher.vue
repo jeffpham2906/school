@@ -14,16 +14,24 @@
     >
       <template #header>
         <div class="flex justify-between">
-          <h1>
-            {{ $t('detail_teacher') }}
+          <h1 v-if="isCreate">{{ $t('add_teacher') }}</h1>
+          <h1 v-else>
+            {{ isEdited ? $t('change_teacher') : $t('detail_teacher') }}
           </h1>
-          <UButton
-            color="gray"
-            variant="ghost"
-            icon="i-heroicons-x-mark-20-solid"
-            class="-my-1"
-            @click="isOpen = false"
-          />
+          <div class="flex gap-2">
+            <UButton
+              v-show="status === Action.Detail"
+              icon="i-heroicons-pencil-square"
+              variant="ghost"
+              :label="$t('change')"
+              @click="status = Action.Change"
+            />
+            <UButton
+              variant="ghost"
+              icon="i-heroicons-x-mark"
+              @click="isOpen = false"
+            />
+          </div>
         </div>
       </template>
       <UForm
@@ -55,7 +63,7 @@
                 <div
                   class="absolute right-0 bottom-0"
                   @click="fileAvatar.click()"
-                  v-show="isEdit"
+                  v-show="isEdited"
                 >
                   <label>
                     <UButton
@@ -76,14 +84,19 @@
               </UAvatar>
             </div>
             <UInlineFormGroup :label="$t('teacherCode')">
-              <UInput v-model="teacher.teacherCode" :disabled="!isEdit" />
+              <UInput
+                v-model="teacher.teacherCode"
+                :disabled="!isEdited || isCreate"
+                :placeholder="$t('auto_gen')"
+                :focus="$el.focus"
+              />
             </UInlineFormGroup>
             <UInlineFormGroup :label="$t('gender')" name="gender">
               <ISelect
                 v-model="teacher.gender"
                 :options="['male', 'female', 'other']"
                 :placeholder="$t('select_gender')"
-                :disabled="!isEdit"
+                :disabled="!isEdited"
               >
                 <template #labelValue>
                   {{ $t(teacher.gender || 'select_gender') }}
@@ -91,16 +104,16 @@
               </ISelect>
             </UInlineFormGroup>
             <UInlineFormGroup label="Email" name="email" required>
-              <UInput v-model="teacher.email" :disabled="!isEdit" />
+              <UInput v-model="teacher.email" :disabled="!isEdited" />
             </UInlineFormGroup>
             <UInlineFormGroup :label="$t('name')" name="name" required>
-              <UInput v-model="teacher.name" :disabled="!isEdit" />
+              <UInput v-model="teacher.name" :disabled="!isEdited" />
             </UInlineFormGroup>
             <UInlineFormGroup :label="$t('nationality')">
-              <UInput v-model="teacher.nationality" :disabled="!isEdit" />
+              <UInput v-model="teacher.nationality" :disabled="!isEdited" />
             </UInlineFormGroup>
             <UInlineFormGroup :label="$t('phone')" name="phone" required>
-              <UInput v-model="teacher.phone" :disabled="!isEdit" />
+              <UInput v-model="teacher.phone" :disabled="!isEdited" />
             </UInlineFormGroup>
             <UInlineFormGroup :label="$t('date_of_birth')">
               <UPopover>
@@ -114,7 +127,7 @@
                   "
                   color="gray"
                   class="w-full"
-                  :disabled="!isEdit"
+                  :disabled="!isEdited"
                 />
                 <template #panel="{ close }">
                   <DatePicker
@@ -133,12 +146,12 @@
                 <UInput
                   class="w-3/5"
                   v-model="teacher.permanentResidence"
-                  :disabled="!isEdit"
+                  :disabled="!isEdited"
                 />
               </UInlineFormGroup>
             </div>
             <UInlineFormGroup :label="$t('passport')" name="passport" required>
-              <UInput v-model="teacher.passport" :disabled="!isEdit" />
+              <UInput v-model="teacher.passport" :disabled="!isEdited" />
             </UInlineFormGroup>
             <div class="col-start-3 col-end-5">
               <UInlineFormGroup
@@ -149,7 +162,7 @@
                 <UInput
                   class="w-3/5"
                   v-model="teacher.currentAddress"
-                  :disabled="!isEdit"
+                  :disabled="!isEdited"
                 />
               </UInlineFormGroup>
             </div>
@@ -163,7 +176,7 @@
               <ISelect
                 v-model="teacher.type"
                 :options="['official', 'contract', 'parttime']"
-                :disabled="!isEdit"
+                :disabled="!isEdited"
               >
                 <template #labelValue>
                   {{ $t(teacher.type) }}
@@ -176,7 +189,7 @@
                 <ISelect
                   v-model="teacher.status"
                   :options="['active', 'disabled']"
-                  :disabled="!isEdit"
+                  :disabled="!isEdited"
                   class="w-[142px]"
                 >
                   <template #labelValue>
@@ -187,7 +200,7 @@
             </div>
 
             <UInlineFormGroup :label="$t('note')">
-              <UTextarea v-model="teacher.note" :disabled="!isEdit" />
+              <UTextarea v-model="teacher.note" :disabled="!isEdited" />
             </UInlineFormGroup>
 
             <div
@@ -228,14 +241,14 @@
                       color="gray"
                       variant="ghost"
                       @click="handleDeleteContract(item)"
-                      v-if="isEdit"
+                      v-if="isEdited"
                     />
                   </template>
                 </UDropdown>
               </UInlineFormGroup>
               <div
                 class="flex items-center justify-center mt-1"
-                v-show="isEdit"
+                v-show="isEdited"
               >
                 <div @click="fileContracts.click()">
                   <label>
@@ -262,12 +275,12 @@
       <template #footer>
         <div class="flex gap-6">
           <UButton
-            v-show="isEdit"
+            v-show="isEdited"
             class="w-24 items-center justify-center"
             :trailing="true"
             @click="form.submit()"
           >
-            {{ $t('change') }}
+            {{ isCreate ? $t('add') : $t('change') }}
           </UButton>
           <UButton
             variant="ghost"
@@ -285,43 +298,20 @@
 
 <script setup lang="ts">
 import type { FormErrorEvent, FormSubmitEvent } from '#ui/types'
-import type { Data, GetOne, Issue } from '~/types'
-import {
-  Gender,
-  Status,
-  Type,
-  type Teacher,
-  type Avatar,
-} from '~/types/teacher.types'
-import USpin from './USpin.vue'
 import { teacherSchema } from '~/schema'
 import { format } from 'date-fns'
-const props = defineProps<{
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  refreshFc: Function
-}>()
+import USpin from '../USpin.vue'
 
-const isOpen = defineModel()
-const form = ref()
-const fileAvatar = ref()
-const fileContracts = ref()
-const modal = useModal()
-const route = useRoute()
-const toast = useToast()
-const isEdit = computed(() => route.params.method === 'edit')
-
-const { data } = await useAPI<Data<GetOne<Teacher>, null>>(
-  `/teachers/${route.params.id}`
-)
-const temp = {
-  avatar: { key: '', bucket: '', url: '', ext: '', filename: '' },
+const emit = defineEmits(['callRefresh'])
+let initState: Teacher = {
+  avatar: undefined,
   contracts: [],
   name: '',
   teacherCode: '',
   email: '',
   phone: '',
   gender: Gender.Male,
-  dateOfBirth: '',
+  dateOfBirth: new Date(Date.now()),
   nationality: '',
   passport: '',
   permanentResidence: '',
@@ -331,8 +321,48 @@ const temp = {
   type: Type.Contract,
   note: '',
 }
-const teacher = data.value?.data.record || temp
-const initState = { ...teacher }
+const teacher = ref<Teacher>(initState)
+const route = useRoute()
+const { data, execute, error } = await useAPI<Data<GetOne<Teacher>, null>>(
+  `/teachers/${route.params.id}`,
+  {
+    immediate: false,
+    lazy: true,
+  }
+)
+
+const isOpen = defineModel()
+const form = ref()
+const fileAvatar = ref()
+const fileContracts = ref()
+const modal = useModal()
+
+const toast = useToast()
+
+const status = ref<string>(String(route.params.method))
+const isChange = computed({
+  get: () => status.value === Action.Change,
+  set: (value) => {
+    if (value) {
+      status.value = Action.Change
+    }
+  },
+})
+const isCreate = computed(() => status.value === Action.Create)
+const isEdited = computed(() => !!(isChange.value || isCreate.value))
+
+onMounted(async () => {
+  if (!isCreate.value) {
+    modal.open(USpin)
+    await execute().finally(() => modal.close())
+    if (data.value) {
+      teacher.value = data.value?.data.record
+      initState = { ...teacher.value }
+    } else if (!data.value && error.value) {
+      toast.add({ title: 'Something went wrong' })
+    }
+  }
+})
 
 const handleFileChange = async (e: Event, field: string) => {
   if (!teacher) return
@@ -340,20 +370,20 @@ const handleFileChange = async (e: Event, field: string) => {
   // @ts-expect-error file
   const file = e.target.files[0]
   if (field === 'avatar') {
-    teacher.avatar = await doUpload(file).finally(() => modal.close())
+    teacher.value.avatar = await doUpload(file).finally(() => modal.close())
   } else if (field === 'contracts') {
     const newContract = await doUpload(file).finally(() => modal.close())
     if (newContract) {
-      if (teacher.contracts) {
-        teacher.contracts = [...teacher.contracts, newContract]
+      if (teacher.value.contracts) {
+        teacher.value.contracts.push(newContract)
       } else {
-        teacher.contracts = [newContract]
+        teacher.value.contracts = [newContract]
       }
     }
   }
 }
 const handleDeleteContract = (contract: Avatar) => {
-  teacher.contracts = teacher.contracts?.filter(
+  teacher.value.contracts = teacher.value.contracts?.filter(
     (item) => item.key !== contract.key
   )
 }
@@ -361,27 +391,46 @@ const handleDeleteContract = (contract: Avatar) => {
 const onSubmit = async (event: FormSubmitEvent<Teacher>) => {
   form.value.clear()
   modal.open(USpin)
-  const data = getDiffObject(initState, event.data) as Teacher
-  data.email = teacher.email
-  data.phone = teacher.phone
+  let err
+  if (isCreate.value) {
+    const { error } = await createTeacher(event.data).finally(() => {
+      toast.add({
+        title: 'Tạo thành công',
+        timeout: 2000,
+        icon: 'i-heroicons-check-circle',
+      })
+      modal.close()
+    })
+    err = error.value?.data
+  } else if (isChange.value) {
+    const data = getDiffObject(initState, event.data) as Teacher
+    data.email = teacher.value.email
+    data.phone = teacher.value.phone
+    const { error } = await updateTeacher(data).finally(() => {
+      toast.add({
+        title: 'Sửa thành công',
+        timeout: 2000,
+        icon: 'i-heroicons-check-circle',
+      })
+      modal.close()
+    })
+    err = error.value?.data
+  }
 
-  const { error } = await updateTeacher(data).finally(() => modal.close())
-  const err = error.value?.data.error.issues
   if (err) {
-    const errMsg = err.map((e: Issue) => {
+    const errMsg = err.error.issues.map((e: Issue) => {
       return {
         path: e.path[0],
         message: e.message,
       }
     })
-    return form.value.setErrors(errMsg)
+    if (errMsg) {
+      return form.value.setErrors(errMsg)
+    } else {
+      toast.add({ title: 'Error' })
+    }
   }
-  await props.refreshFc()
-  toast.add({
-    title: 'Sửa thành công',
-    timeout: 2000,
-    icon: 'i-heroicons-check-circle',
-  })
+  emit('callRefresh')
   isOpen.value = false
 }
 const onError = async (event: FormErrorEvent) => {

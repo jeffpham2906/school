@@ -5,13 +5,13 @@ const phoneRegex =
   /^((\+[1-9]{1,4}[ -]?)|(\([0-9]{2,3}\)[ -]?)|([0-9]{2,4})[ -]?)*?[0-9]{3,4}[ -]?[0-9]{3,4}$/
 
 export const teacherSchema = yup.object<Teacher>({
-  teacherCode: yup.string().required('Vui lòng nhập'),
-  name: yup.string().required('Vui lòng nhập tên'),
-  avatar: yup.mixed(),
+  teacherCode: yup.string(),
   email: yup
     .string()
     .required('Vui lòng nhập email')
     .email('Email không hợp lệ'),
+  name: yup.string().required('Vui lòng nhập tên'),
+  avatar: yup.mixed(),
   phone: yup
     .string()
     .required('Vui lòng nhập SĐT')
@@ -38,4 +38,11 @@ export const userLoginSchema = yup.object({
     .string()
     .required('Password is required')
     .min(6, 'Password at least 6 character'),
+})
+
+export const createViewModeSchema = yup.object({
+  label: yup
+    .string()
+    .required('Label is required')
+    .max(15, 'Label required less than 15 character'),
 })

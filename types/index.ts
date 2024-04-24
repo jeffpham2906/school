@@ -1,7 +1,5 @@
 import type { LocationQueryValue } from 'vue-router'
 
-export * from './auth.types'
-
 export interface Error {
   status: number
 }
@@ -21,8 +19,8 @@ export interface GetData<T> {
   hasPrevPage: boolean
   totalPages: number
   search: string | LocationQueryValue[]
-  filter: Filter
-  filterCustom: Filter
+  filter: object
+  filterCustom: object
 }
 export interface GetOne<T> {
   record: T
@@ -39,6 +37,16 @@ export interface Issue {
 }
 
 export interface Sort {
-  _id: number
+  column: string
+  direction: string
 }
-export interface Filter {}
+export interface Query {
+  page: number
+  limit: number
+  filter: object
+  search?: string | LocationQueryValue[]
+  sort: Sort
+}
+export interface FunctionVoid {
+  async(...args: unknown[]): void | Promise<void>
+}

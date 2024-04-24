@@ -3,7 +3,7 @@
     :value="searchQuery"
     icon="i-heroicons-magnifying-glass-20-solid"
     :placeholder="`${$t('search_by_name/id')}`"
-    class="w-72"
+    class="max-w-xs w-full"
     @input="update"
   />
 </template>

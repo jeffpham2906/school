@@ -5,6 +5,6 @@ export class VietnamTime {
     const vietnamTime = new Date(
       utcDate.getTime() + vietnamTimezoneOffset * 60000
     )
-    return `${vietnamTime.getDay()}/${vietnamTime.getMonth() + 1}/${vietnamTime.getFullYear()}`
+    return `${vietnamTime.getDay() + 1}/${vietnamTime.getMonth() + 1}/${vietnamTime.getFullYear()}`
   }
 }

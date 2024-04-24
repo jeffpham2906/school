@@ -9,12 +9,12 @@ export default defineNuxtConfig({
     },
   },
   imports: {
-    dirs: ['stores', 'services', 'utils'],
+    dirs: ['stores', 'services', 'utils', 'types'],
   },
   colorMode: {
     preference: 'light',
   },
-  modules: ['@nuxt/ui', '@nuxtjs/i18n'],
+  modules: ['@nuxt/ui', '@nuxtjs/i18n', '@pinia/nuxt'],
   i18n: {
     lazy: true,
     langDir: 'locales',

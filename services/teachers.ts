@@ -1,15 +1,11 @@
-import type { Data, GetData, GetOne } from '~/types'
+import type { GetOne } from '~/types'
 import { type Teacher } from '~/types/teacher.types'
 
-export const getAllTeachers = () => {
-  const { queries } = useQuery()
+// export const getAllTeachers = () => {
+//   const { queries } = useQuery()
 
-  return useAPI<Data<GetData<Teacher>, Error>>('/teachers', {
-    pick: ['data'],
-    watch: queries ? [queries] : false,
-    query: queries,
-  })
-}
+//   return
+// }
 
 export const createTeacher = (data: Teacher) => {
   return useAPI<GetOne<Teacher>>(`/teachers`, {

@@ -32,7 +32,7 @@
 
 <script setup lang="ts">
 import type { FormErrorEvent, FormSubmitEvent } from '#ui/types'
-import type { UserLogin } from '~/types'
+
 import { userLoginSchema } from '~/schema'
 
 definePageMeta({

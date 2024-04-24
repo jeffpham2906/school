@@ -15,9 +15,12 @@
           class="w-6 h-6 rotate-180 cursor-pointer"
           @click="isOpenConfirmSignOut = true"
         />
-        <PopUp v-model="isOpenConfirmSignOut" @on-left-click="signOut">
-          Bạn có chắc chắn đăng xuất?
-        </PopUp>
+        <PopupConfirm
+          v-model="isOpenConfirmSignOut"
+          @on-left-click="signOut"
+          message="Bạn có chắc chắn đăng xuất?"
+        />
+
         <DarkMode />
         <USelectMenu
           v-model="language"
@@ -42,7 +45,7 @@
           </template>
         </UFormGroup>
       </div>
-      <div><slot /></div>
+      <slot />
     </div>
   </div>
 </template>
