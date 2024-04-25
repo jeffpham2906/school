@@ -30,12 +30,6 @@ export const teacherSchema = yup.object<Teacher>({
 })
 
 export const userLoginSchema = yup.object({
-  username: yup
-    .string()
-    .required('Username is required')
-    .min(6, 'Username at least 6 character'),
-  password: yup
-    .string()
-    .required('Password is required')
-    .min(6, 'Password at least 6 character'),
+  username: yup.string().required('field_required').min(6, 'min_6'),
+  password: yup.string().required('field_required').min(6, 'min_6'),
 })

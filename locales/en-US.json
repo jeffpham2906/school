@@ -99,5 +99,7 @@
   "sign_up": "Sign up",
   "username": "Username",
   "password": "Password",
-  "welcome": "Welcome"
+  "welcome": "Welcome",
+  "field_required": "Please enter this field",
+  "min_6": "At least 6 character"
 }

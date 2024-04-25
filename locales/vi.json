@@ -99,5 +99,7 @@
   "sign_up": "Đăng ký",
   "username": "Tên đăng nhập",
   "password": "Mật khẩu",
-  "welcome": "Đăng nhập"
+  "welcome": "Đăng nhập",
+  "field_required": "Vui lòng nhập trường này",
+  "min_6": "Tối thiểu 6 ký tự"
 }

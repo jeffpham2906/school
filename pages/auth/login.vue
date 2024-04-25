@@ -13,9 +13,15 @@
     >
       <UFormGroup :label="$t('username')" name="username" required>
         <UInput v-model="state.username" />
+        <template #error="{ error }">
+          <span>{{ error && $t(error) }}</span>
+        </template>
       </UFormGroup>
       <UFormGroup :label="$t('password')" name="password" required>
         <UInput v-model="state.password" type="password" />
+        <template #error="{ error }">
+          <span>{{ error && $t(error) }}</span>
+        </template>
       </UFormGroup>
       <UCheckbox v-model="isSaved" :label="$t('save_login_infor')" />
       <UButton

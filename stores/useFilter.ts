@@ -58,12 +58,7 @@ export const useFilter = defineStore('filters', () => {
 
   //List saved
   const listFilterSaved = useCookie<FilterMode[]>('filters', {
-    default: () => [
-      {
-        value: 'something',
-        filterObj: { gender: ['male'], type: [], status: [] },
-      },
-    ],
+    default: () => [],
   })
 
   const setLabelFilterArr = (filterObj: SelectedFilters): string[] => {
