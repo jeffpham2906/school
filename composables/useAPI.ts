@@ -29,12 +29,15 @@ export const useAPI = async <T = unknown>(
         }
       }
     },
-    async onResponse({ response }) {
+    async onResponse({ response, error }) {
       const hasError =
         !response.ok || response.status.toString().startsWith('4')
       if (hasError) {
         if (response.status === 401) {
           await refreshFunc()
+        }
+        if (error) {
+          throw createError(error)
         }
       }
     },

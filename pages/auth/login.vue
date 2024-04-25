@@ -1,6 +1,8 @@
 <template>
   <div>
-    <h1 class="text-center text-3xl my-4 dark:text-gray-200">Login</h1>
+    <h1 class="text-center text-3xl my-4 dark:text-gray-200">
+      {{ $t('welcome') }}
+    </h1>
     <UForm
       :schema="userLoginSchema"
       :state="state"
@@ -9,22 +11,24 @@
       @error="onError"
       ref="form"
     >
-      <UFormGroup label="Username" name="username" required>
+      <UFormGroup :label="$t('username')" name="username" required>
         <UInput v-model="state.username" />
       </UFormGroup>
-      <UFormGroup label="Password" name="password" required>
+      <UFormGroup :label="$t('password')" name="password" required>
         <UInput v-model="state.password" type="password" />
       </UFormGroup>
+      <UCheckbox v-model="isSaved" :label="$t('save_login_infor')" />
       <UButton
         type="submit"
         class="w-32 flex items-center justify-center mx-auto !mt-10"
-        >Login</UButton
       >
+        {{ $t('login') }}
+      </UButton>
       <UButton
         variant="link"
         class="mx-auto flex items-center justify-center w-32"
       >
-        Sign up
+        {{ $t('sign_up') }}
       </UButton>
     </UForm>
   </div>
@@ -32,16 +36,22 @@
 
 <script setup lang="ts">
 import type { FormErrorEvent, FormSubmitEvent } from '#ui/types'
-
 import { userLoginSchema } from '~/schema'
 
 definePageMeta({
   layout: 'auth-layout',
 })
-
+const isSaved = ref(false)
+const loginInforSaved = useCookie<UserLogin>('login_infor')
 const state = reactive<UserLogin>({
   username: '',
   password: '',
+})
+onMounted(() => {
+  if (loginInforSaved.value?.password && loginInforSaved.value?.username) {
+    state.username = loginInforSaved.value.username
+    state.password = loginInforSaved.value.password
+  }
 })
 const form = ref()
 const { signIn, isLoggedIn } = useAuth()
@@ -50,7 +60,9 @@ const onSubmit = async (event: FormSubmitEvent<UserLogin>) => {
   const { error } = await signIn(event.data, route.query.redirect_url)
   if (error.value) {
     form.value.setErrors([{ path: 'username', message: error.value.message }])
+    return
   }
+  loginInforSaved.value = event.data
 }
 
 const onError = async (event: FormErrorEvent) => {

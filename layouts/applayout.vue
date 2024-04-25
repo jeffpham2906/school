@@ -4,7 +4,7 @@
       class="h-screen grid grid-rows-[auto,1fr] grid-cols-[auto,1fr] dark:bg-gray-900"
     >
       <div class="row-start-1 row-end-3 px-6 py-3 border-r">
-        <h1 class="text-center font-semibold px-4 py-2 mb-6">Logo</h1>
+        <h1 class="text-center font-semibold px-4 py-2 mb-6"></h1>
         <NavBar />
       </div>
       <div
@@ -17,8 +17,8 @@
         />
         <PopupConfirm
           v-model="isOpenConfirmSignOut"
-          @on-left-click="signOut"
-          message="Bạn có chắc chắn đăng xuất?"
+          @on-accept="signOut"
+          :message="$t('are_you_sure_to_sign_out')"
         />
 
         <DarkMode />

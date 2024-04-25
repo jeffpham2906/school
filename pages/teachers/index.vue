@@ -17,9 +17,9 @@
     <PopupConfirm
       v-if="isDeletePopupOpen"
       v-model="isDeletePopupOpen"
-      @on-accept="handleDeleteTeacher(rowsSelected[0])"
-      @on-refuse="rowsSelected = []"
-      :message="`${$t('confirm_delete')} ${$t('teacher')} ${rowsSelected[0]?.name}`"
+      @on-accept="handleDeleteTeacher()"
+      @on-refuse="deleteTeacherInfo = { ...initDeleteTeacherInfor }"
+      :message="`${$t('confirm_delete')} ${$t('teacher')} ${deleteTeacherInfo.name}`"
     />
     <ModalTeacher
       v-if="isDetailSceenOpen"
@@ -45,6 +45,7 @@
               class="w-full flex justify-between"
               trailing
               variant="ghost"
+              @click="useToast().add({ title: 'Chưa cài' })"
             >
               <span> {{ $t(item.label) }}</span>
               <UIcon name="i-heroicons-trash" class="h-4 w-4" />
@@ -152,7 +153,12 @@
         >
           <div v-if="field.key === 'name'" class="flex items-center gap-2">
             <UAvatar :src="teacher?.avatar?.url" icon="i-heroicons-user" />
-            <span>{{ teacher[field.key] }}</span>
+            <span
+              :class="[
+                teacher.slug.includes(stringToSlug(search)) && 'text-[#f87171]',
+              ]"
+              >{{ teacher[field.key] }}</span
+            >
           </div>
           <span v-else>{{ teacher[field.key] }}</span>
         </div>
@@ -256,20 +262,26 @@ const handleOpenCreate = () => {
 
 const rowsSelected = ref<Teacher[]>([])
 const isDeletePopupOpen = ref(false)
+interface DeleteTeacherInfo {
+  id: string
+  name: string
+}
+const initDeleteTeacherInfor = { id: '', name: '' }
+const deleteTeacherInfo = ref<DeleteTeacherInfo>({ ...initDeleteTeacherInfor })
 const handleOpenDeletePopup = (teacher: Teacher) => {
   isDeletePopupOpen.value = true
-  rowsSelected.value = [teacher]
+  deleteTeacherInfo.value.id = teacher.id as string
+  deleteTeacherInfo.value.name = teacher.name
 }
-const handleDeleteTeacher = async (teacher: Teacher) => {
-  if (teacher.id) {
-    await deleteTeacher(teacher.id)
-    rowsSelected.value = []
+const handleDeleteTeacher = async () => {
+  if (deleteTeacherInfo.value) {
+    await deleteTeacher(deleteTeacherInfo.value.id)
     await refresh()
     isDeletePopupOpen.value = false
+    deleteTeacherInfo.value = { ...initDeleteTeacherInfor }
   }
 }
 // Pagination
-const search = ref(route.query.search || '')
 
 const page = ref(Number(route.query.page) || 1)
 const limit = ref(Number(route.query.limit) || 10)
@@ -288,10 +300,22 @@ const pageTo = computed(() =>
   )
 )
 const queries = computed(() => filterStore.query)
+const search = ref<string>((route.query.search as string) || '')
+watch(search, () => {
+  if (search.value) {
+    navigateTo({ query: { ...route.query, search: search.value } })
+  } else {
+    const queryObj = { ...route.query }
+    delete queryObj['search']
+    navigateTo({ query: queryObj })
+  }
+})
 
 // Fetch Data
 const { data, refresh, pending } = await useAPI<Data<GetData<Teacher>, Error>>(
-  () => '/teachers' + `?${queries.value}`,
+  () =>
+    '/teachers' +
+    `?${queries.value}${search.value && `&search=${search.value}`}`,
   {
     pick: ['data'],
     watch: [page, limit, search, queries, sort],

@@ -1,12 +1,3 @@
-import type { GetOne } from '~/types'
-import { type Teacher } from '~/types/teacher.types'
-
-// export const getAllTeachers = () => {
-//   const { queries } = useQuery()
-
-//   return
-// }
-
 export const createTeacher = (data: Teacher) => {
   return useAPI<GetOne<Teacher>>(`/teachers`, {
     method: 'POST',

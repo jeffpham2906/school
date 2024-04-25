@@ -90,5 +90,14 @@
   "please_enter_a_name_filter_mode": "Please enter a name filter mode",
   "show_all": "Show all",
   "hide_all": "Hide all",
-  "label_required": "Label is required"
+  "label_required": "Label is required",
+  "are_you_sure_to_sign_out": "Are you sure to sign out",
+  "yes": "Yes",
+  "no": "No",
+  "save_login_infor": "Save login information",
+  "login": "Login",
+  "sign_up": "Sign up",
+  "username": "Username",
+  "password": "Password",
+  "welcome": "Welcome"
 }

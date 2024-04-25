@@ -4,13 +4,13 @@
       <div class="mb-4">{{ message }} ?</div>
       <div class="flex justify-around gap-2">
         <UButton
-          label="Có"
+          :label="$t('yes')"
           class="w-20 flex justify-center"
           variant="ghost"
           @click="emit('onAccept')"
         />
         <UButton
-          label="Không"
+          :label="$t('no')"
           class="w-20 flex justify-center"
           @click="handleRightClick"
         />
