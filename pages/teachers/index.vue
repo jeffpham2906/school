@@ -38,16 +38,16 @@
             :label="$t('bulk_button')"
             icon="i-heroicons-circle-stack"
             variant="ghost"
+            color="gray"
           />
           <template #item="{ item }">
             <UButton
-              class="w-full"
-              icon="i-heroicons-trash"
+              class="w-full flex justify-between"
               trailing
-              variant="soft"
-              color="teal"
+              variant="ghost"
             >
-              {{ $t(item.label) }}
+              <span> {{ $t(item.label) }}</span>
+              <UIcon name="i-heroicons-trash" class="h-4 w-4" />
             </UButton>
           </template>
         </UDropdown>
@@ -67,10 +67,23 @@
         v-model:filter-actived-name="filterStore.filterActived"
         @apply-filter="filterStore.applyFilters"
         @create-filter-mode="filterStore.createFilterMode"
+        @update-filter-mode="filterStore.updateFilterMode"
         @delete-filter-mode="filterStore.deleteFilterMode"
       >
         <UButton icon="i-heroicons-funnel" size="xs" variant="soft">
-          {{ $t('filter') }}
+          <span v-if="filterStore.labelFilterArr.length <= 0">
+            {{ $t('Filter') }}
+          </span>
+          <span v-else> {{ $t('filter_by') }}: </span>
+          <span
+            v-for="(label, index) in filterStore.labelFilterArr"
+            :key="label"
+          >
+            <span>{{ $t(label) }}</span>
+            <span v-if="index + 1 !== filterStore.labelFilterArr.length">
+              ,
+            </span>
+          </span>
         </UButton>
       </FilterDropView>
       <DropColumnView
@@ -125,7 +138,7 @@
           <div v-if="field.key === 'status'">
             <UBadge
               :label="`${$t(teacher.status)}`"
-              :color="teacher.status === 'active' ? 'primary' : 'purple'"
+              :color="teacher.status === 'active' ? 'primary' : 'gray'"
               size="xs"
               variant="soft"
             />
@@ -205,7 +218,7 @@
 import { deleteTeacher } from '~/services/teachers'
 const fieldStore = useField()
 const filterStore = useFilter()
-const columnsTable = computed(() =>
+const columnsTable: ComputedRef<Column[]> = computed(() =>
   fieldStore.allFields.filter((field) =>
     fieldStore.selectedFields.some(
       (selected: Column) => selected.key === field.key

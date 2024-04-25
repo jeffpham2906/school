@@ -17,8 +17,6 @@
 </template>
 
 <script setup lang="ts">
-import type { Column, Sort } from '~/types'
-
 const emit = defineEmits(['onClick'])
 
 defineProps<{

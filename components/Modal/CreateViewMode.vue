@@ -8,17 +8,28 @@
       }"
     >
       <template #header>
-        {{ $t('create_view_mode_field') }}
+        <span v-if="!isEdit">{{ $t('create_view_mode_field') }}</span>
+        <span v-else>{{ $t('update_view_mode_field') }}</span>
       </template>
       <UForm
         ref="formCreateViewMode"
         :state="viewModeState"
-        :schema="createViewModeSchema"
+        :validate="validate"
         @error="onError"
         @submit="onSubmit"
       >
         <UFormGroup :label="$t('view_mode_name')" name="label">
-          <UInput v-model="viewModeState.label" />
+          <template #default="{ error }">
+            <UInput
+              v-model="viewModeState.label"
+              :trailing-icon="
+                error ? 'i-heroicons-exclamation-triangle-20-solid' : undefined
+              "
+            />
+          </template>
+          <template #error="{ error }">
+            <span>{{ error && $t(error) }}</span>
+          </template>
         </UFormGroup>
         <UDivider class="my-6" />
         <ULabel :label="$t('fields')" />
@@ -36,7 +47,12 @@
       </UForm>
       <template #footer>
         <UButton @click="formCreateViewMode.submit()">
-          {{ $t('create') }}
+          <span v-if="!isEdit">
+            {{ $t('create') }}
+          </span>
+          <span v-else>
+            {{ $t('update') }}
+          </span>
         </UButton>
         <UButton @click="isCreateViewModeOpen = false" variant="ghost">
           {{ $t('cancel') }}
@@ -47,8 +63,7 @@
 </template>
 
 <script setup lang="ts">
-import { createViewModeSchema } from '~/schema'
-import type { FormErrorEvent, FormSubmitEvent } from '#ui/types'
+import type { FormError, FormErrorEvent, FormSubmitEvent } from '#ui/types'
 
 defineProps<{
   allFields: Column[]
@@ -97,12 +112,20 @@ const handleChangeCheckBox = (field: Column) => {
     viewModeState.value.fields.splice(index, 1)
   }
 }
+const validate = (): FormError[] => {
+  const errors = []
+  if (!viewModeState.value.label) {
+    errors.push({ path: 'label', message: 'label_required' })
+  }
+  return errors
+}
 const onSubmit = (event: FormSubmitEvent<ViewMode>) => {
   if (event.data.fields.length < 2) {
     return toast.add({
       title: 'At least 2 field be selected',
-      icon: 'i-heroicons-x-circle',
+      icon: 'i-heroicons-exclamation-triangle-20-solid',
       timeout: 2500,
+      color: 'red',
     })
   }
   if (!isEdit.value) {

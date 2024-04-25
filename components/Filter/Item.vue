@@ -5,7 +5,18 @@
       @click="showDetail = !showDetail"
     >
       <span>{{ $t(label) }}</span>
-      <UButton icon="i-heroicons-chevron-down" size="xs" variant="ghost" />
+      <UButton
+        v-if="showDetail"
+        icon="i-heroicons-chevron-up"
+        size="xs"
+        variant="ghost"
+      />
+      <UButton
+        v-else
+        icon="i-heroicons-chevron-down"
+        size="xs"
+        variant="ghost"
+      />
     </div>
     <div v-show="showDetail" class="flex flex-col gap-1">
       <UCheckbox

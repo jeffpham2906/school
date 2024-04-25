@@ -7,7 +7,7 @@
           <template #default="{ item }"> {{ $t(item.label) }}</template>
           <template #item="{ item }">
             <UCard
-              v-if="item.label === 'filter'"
+              v-if="item.label === 'Filter'"
               :ui="{
                 footer: {
                   base: 'flex justify-around',
@@ -26,10 +26,10 @@
 
               <template #footer>
                 <UButton size="xs" variant="ghost" @click="onClearFilter">
-                  {{ $t('clear ') }}
+                  {{ $t('clear') }}
                 </UButton>
                 <UButton size="xs" @click="emit('applyFilter', 'default')">
-                  {{ $t('apply ') }}
+                  {{ $t('apply') }}
                 </UButton>
               </template>
             </UCard>
@@ -40,6 +40,9 @@
               :all-filters="items"
               @create-filter-mode="(e) => emit('createFilterMode', e)"
               @delete-filter-mode="(e) => emit('deleteFilterMode', e)"
+              @update-filter-mode="
+                (data, staleValue) => emit('updateFilterMode', data, staleValue)
+              "
               @apply-filter="(e) => emit('applyFilter', e)"
               @clear-filter-mode="handleClearFilterMode"
             />
@@ -74,8 +77,9 @@ const emit = defineEmits<{
   applyFilter: [filterMode: string]
   createFilterMode: [filterMode: FilterMode]
   deleteFilterMode: [nameFilterMode: string]
+  updateFilterMode: [filterMode: FilterMode, staleValue: string]
 }>()
-const tabs = [{ label: 'filter' }, { label: 'list_save_filters' }]
+const tabs = [{ label: 'Filter' }, { label: 'list_save_filters' }]
 const onClearFilter = () => {
   selectedFilters.value.gender = []
   selectedFilters.value.type = []

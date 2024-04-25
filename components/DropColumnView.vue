@@ -36,7 +36,8 @@
             }"
           >
             <template #label>
-              {{ $t(option.label) }}
+              <span v-if="!option.isEdited"> {{ $t(option.label) }}</span>
+              <span v-else>{{ option.label }}</span>
               <div v-if="option.isEdited" class="flex items-start">
                 <UButton
                   @click="() => handleOpenEditViewMode(option)"
@@ -76,10 +77,10 @@
         <template #footer>
           <div class="flex items-center justify-around">
             <UButton size="xs" variant="soft" @click="handleShowAll">
-              Show All
+              {{ $t('show_all') }}
             </UButton>
             <UButton size="xs" variant="soft" @click="handleHideAll">
-              Hide All
+              {{ $t('hide_all') }}
             </UButton>
           </div>
         </template>

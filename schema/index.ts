@@ -39,10 +39,3 @@ export const userLoginSchema = yup.object({
     .required('Password is required')
     .min(6, 'Password at least 6 character'),
 })
-
-export const createViewModeSchema = yup.object({
-  label: yup
-    .string()
-    .required('Label is required')
-    .max(15, 'Label required less than 15 character'),
-})

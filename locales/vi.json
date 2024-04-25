@@ -56,7 +56,8 @@
   "general_infor": "Thông tin chung",
   "email": "Email",
   "actions": "Hành động",
-  "filter": "Bộ lọc",
+  "Filter": "Bộ lọc",
+  "filter": "bộ lọc",
   "field": "Trường dữ liệu",
   "save": "Lưu",
   "createdBy": "Tạo bởi",
@@ -77,7 +78,17 @@
   "view_mode": "Chế độ xem",
   "view_mode_name": "Tên chế độ xem",
   "create_view_mode_field": "Tạo chế độ xem trường dữ liệu",
+  "update_view_mode_field": "Cập nhật chế độ xem",
   "delete_view_mode": "Xoá chế độ xem",
   "create_filter": "Tạo bộ lọc",
-  "manage_filters": "Quản lý bộ lọc"
+  "manage_filters": "Quản lý bộ lọc",
+  "filter_by": "Lọc theo",
+  "clear": "Gỡ tất cả",
+  "apply": "Áp dụng",
+  "update_filter": "Cập nhật bộ lọc",
+  "update": "Cập nhật",
+  "please_enter_a_name_filter_mode": "Vui lòng nhập tên bộ lọc",
+  "show_all": "Hiện tất cả",
+  "hide_all": "Ẩn tất cả",
+  "label_required": "Vui lòng nhập trường này"
 }

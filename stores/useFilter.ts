@@ -6,8 +6,7 @@ export interface Filter {
   autoShow?: boolean
 }
 export interface FilterMode {
-  name: string
-  value?: string
+  value: string
   filterObj: SelectedFilters
 }
 export interface SelectedFilters {
@@ -61,40 +60,63 @@ export const useFilter = defineStore('filters', () => {
   const listFilterSaved = useCookie<FilterMode[]>('filters', {
     default: () => [
       {
-        name: 'something',
         value: 'something',
         filterObj: { gender: ['male'], type: [], status: [] },
       },
     ],
   })
 
+  const setLabelFilterArr = (filterObj: SelectedFilters): string[] => {
+    return Object.keys(filterObj).reduce((pre: string[], curr) => {
+      if (selectedFilters[curr as keyof SelectedFilters].length >= 1) {
+        pre.push(curr)
+      }
+      return pre
+    }, [])
+  }
+
+  const labelFilterArr = ref<string[]>(setLabelFilterArr(selectedFilters))
+
   const applyFilters = (filterMode: string) => {
     if (filterMode !== 'default') {
-      const data = listFilterSaved.value.find((e) => e.name === filterMode)
+      const data = listFilterSaved.value.find((e) => e.value === filterMode)
       if (data) {
+        selectedFilters.gender = []
+        selectedFilters.type = []
+        selectedFilters.status = []
         query.value = parseFilterObjectToString(data.filterObj)
+        labelFilterArr.value = [filterMode]
         navigateTo({ query: { ...data.filterObj } })
+        return
       }
-      return
     }
-    query.value = parseFilterObjectToString(selectedFilters)
-    navigateTo({ query: { ...selectedFilters } })
     filterActived.value = 'default'
+    query.value = parseFilterObjectToString(selectedFilters)
+    labelFilterArr.value = setLabelFilterArr(selectedFilters)
+    navigateTo({ query: { ...selectedFilters } })
   }
 
   const createFilterMode = (filterMode: FilterMode) => {
-    filterMode.value = filterMode.name
-    listFilterSaved.value.push(filterMode)
+    filterActived.value = filterMode.value
+    listFilterSaved.value = [...listFilterSaved.value, filterMode]
+    applyFilters(filterMode.value)
   }
   const deleteFilterMode = (filterName: string) => {
-    const index = listFilterSaved.value.findIndex((e) => e.name === filterName)
+    const index = listFilterSaved.value.findIndex((e) => e.value === filterName)
     if (index >= 0) {
       listFilterSaved.value.splice(index, 1)
     }
   }
+  const updateFilterMode = (filter: FilterMode, staleValue: string) => {
+    listFilterSaved.value = listFilterSaved.value.map((e) => {
+      if (e.value === staleValue) {
+        return filter
+      }
+      return e
+    })
+  }
   const filterActived = ref<string>('')
   watch(filterActived, () => console.log(filterActived.value))
-
   return {
     allFilters,
     selectedFilters,
@@ -104,5 +126,7 @@ export const useFilter = defineStore('filters', () => {
     filterActived,
     createFilterMode,
     deleteFilterMode,
+    updateFilterMode,
+    labelFilterArr,
   }
 })

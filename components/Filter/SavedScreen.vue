@@ -2,8 +2,23 @@
   <ModalCreateFilterMode
     v-if="isCreateFilterModeOpen"
     v-model:is-create-filter-mode-open="isCreateFilterModeOpen"
+    v-model:selected-filter-to-edit="selectedFilterToEdit"
     :all-filters="allFilters"
     @create-filter-mode="(e) => emit('createFilterMode', e)"
+    @update-filter-mode="
+      (data, staleValue) => emit('updateFilterMode', data, staleValue)
+    "
+  />
+  <PopupConfirm
+    v-model="isPopupConfirmOpen"
+    :message="`${$t('confirm_delete')} ${$t('filter')} ${nameDeleted}`"
+    @on-accept="
+      () => {
+        emit('deleteFilterMode', nameDeleted)
+        isPopupConfirmOpen = false
+      }
+    "
+    @on-refuse="nameDeleted = ''"
   />
   <UCard
     :ui="{
@@ -35,38 +50,33 @@
         inner: 'w-full',
         wrapper: 'items-center',
       }"
-      :label="filterSaved.name"
+      :label="filterSaved.value"
       v-model="filterActivedName"
     >
       <template #label>
-        <span class="max-w-28 break-words">{{ filterSaved.name }}</span>
+        <span class="max-w-28 break-words">{{ filterSaved.value }}</span>
         <div class="flex items-center">
-          <PopupConfirm
-            v-model="isPopupConfirmOpen"
-            :message="$t('confirm_delete')"
-            @on-accept="emit('deleteFilterMode', filterSaved.name)"
-          />
           <UButton
             icon="i-heroicons-pencil-square"
             variant="ghost"
             size="2xs"
-            @click="handleEditFilterSaved"
+            @click="handleEditFilterSaved(filterSaved)"
           />
           <UButton
             icon="i-heroicons-trash"
             variant="ghost"
             size="2xs"
-            @click="isPopupConfirmOpen = true"
+            @click="handleDeleteModalOpen(filterSaved.value)"
           />
         </div>
       </template>
     </URadio>
     <template #footer>
       <UButton size="xs" variant="ghost" @click="emit('clearFilterMode')">
-        {{ $t('clear ') }}
+        {{ $t('clear') }}
       </UButton>
       <UButton size="xs" @click="emit('applyFilter', filterActivedName)">
-        {{ $t('apply ') }}
+        {{ $t('apply') }}
       </UButton>
     </template>
   </UCard>
@@ -79,6 +89,7 @@ defineProps<{
 const emit = defineEmits<{
   applyFilter: [filterMode: string]
   createFilterMode: [filterMode: FilterMode]
+  updateFilterMode: [filterMode: FilterMode, staleValue: string]
   deleteFilterMode: [filterValue: string]
   clearFilterMode: []
 }>()
@@ -92,10 +103,15 @@ const filterActivedName = defineModel<string>('filterActivedName', {
 })
 
 const isCreateFilterModeOpen = ref(false)
-
-const handleEditFilterSaved = () => {
+const selectedFilterToEdit = ref<FilterMode | undefined>()
+const handleEditFilterSaved = (filterMode: FilterMode) => {
+  selectedFilterToEdit.value = filterMode
   isCreateFilterModeOpen.value = true
 }
-
+const nameDeleted = ref('')
 const isPopupConfirmOpen = ref(false)
+const handleDeleteModalOpen = (name: string) => {
+  nameDeleted.value = name
+  isPopupConfirmOpen.value = true
+}
 </script>
