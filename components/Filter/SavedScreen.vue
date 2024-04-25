@@ -39,7 +39,20 @@
         @click="isCreateFilterModeOpen = true"
       />
     </template>
-    <span v-if="listFilterSaved.length < 1">{{ $t('emtpy') }}</span>
+
+    <div
+      v-if="listFilterSaved.length < 1"
+      class="flex flex-col items-center justify-center py-6 gap-3"
+    >
+      <span class="italic text-sm">{{ $t('empty') }}</span>
+      <UButton
+        @click="isCreateFilterModeOpen = true"
+        :label="$t('add')"
+        icon="i-heroicons-plus"
+        trailing
+        size="xs"
+      />
+    </div>
     <URadio
       v-else
       v-for="filterSaved in listFilterSaved"
