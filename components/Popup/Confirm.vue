@@ -1,7 +1,9 @@
 <template>
   <UModal v-model="isOpen" :ui="{ width: 'w-fit' }">
     <UCard>
-      <div class="mb-4">{{ message }} ?</div>
+      <div class="mb-4">
+        <slot>{{ message }}?</slot>
+      </div>
       <div class="flex justify-around gap-2">
         <UButton
           :label="$t('yes')"

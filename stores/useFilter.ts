@@ -110,8 +110,12 @@ export const useFilter = defineStore('filters', () => {
       return e
     })
   }
-  const filterActived = ref<string>('')
-  watch(filterActived, () => console.log(filterActived.value))
+  const onClearFilter = () => {
+    selectedFilters.gender = []
+    selectedFilters.type = []
+    selectedFilters.status = []
+  }
+  const filterActived = ref<string>('default')
   return {
     allFilters,
     selectedFilters,
@@ -122,6 +126,7 @@ export const useFilter = defineStore('filters', () => {
     createFilterMode,
     deleteFilterMode,
     updateFilterMode,
+    onClearFilter,
     labelFilterArr,
   }
 })

@@ -19,8 +19,11 @@
       v-model="isDeletePopupOpen"
       @on-accept="handleDeleteTeacher()"
       @on-refuse="deleteTeacherInfo = { ...initDeleteTeacherInfor }"
-      :message="`${$t('confirm_delete')} ${$t('teacher')} ${deleteTeacherInfo.name}`"
-    />
+    >
+      {{ `${$t('confirm_delete')} ${$t('teacher')} ` }}
+      <span class="text-red-600">{{ deleteTeacherInfo.name }}</span>
+      ?
+    </PopupConfirm>
     <ModalTeacher
       v-if="isDetailSceenOpen"
       v-model="isDetailSceenOpen"
@@ -70,6 +73,7 @@
         @create-filter-mode="filterStore.createFilterMode"
         @update-filter-mode="filterStore.updateFilterMode"
         @delete-filter-mode="filterStore.deleteFilterMode"
+        @on-clear-filter="filterStore.onClearFilter"
       >
         <UButton icon="i-heroicons-funnel" size="xs" variant="soft">
           <span v-if="filterStore.labelFilterArr.length <= 0">
@@ -113,6 +117,12 @@
       sort-mode="manual"
       class="mt-1"
     >
+      <template #empty-state>
+        <div class="flex flex-col items-center justify-center p-14 gap-3">
+          <UIcon name="i-heroicons-circle-stack-solid" />
+          <span class="italic text-sm">{{ $t('empty') }}!</span>
+        </div>
+      </template>
       <template
         v-for="field in columnsTable"
         #[`${field.key}-header`]="{ column, onSort }"
@@ -281,10 +291,8 @@ const handleDeleteTeacher = async () => {
     deleteTeacherInfo.value = { ...initDeleteTeacherInfor }
   }
 }
-// Pagination
 
-const page = ref(Number(route.query.page) || 1)
-const limit = ref(Number(route.query.limit) || 10)
+const { page, limit } = usePagination()
 
 const sort = ref<Sort>({ column: 'createdAt', direction: 'desc' })
 
@@ -300,10 +308,12 @@ const pageTo = computed(() =>
   )
 )
 const queries = computed(() => filterStore.query)
+watch(queries, () => (page.value = 1))
 const search = ref<string>((route.query.search as string) || '')
 watch(search, () => {
   if (search.value) {
     navigateTo({ query: { ...route.query, search: search.value } })
+    page.value = 1
   } else {
     const queryObj = { ...route.query }
     delete queryObj['search']
@@ -315,7 +325,7 @@ watch(search, () => {
 const { data, refresh, pending } = await useAPI<Data<GetData<Teacher>, Error>>(
   () =>
     '/teachers' +
-    `?${queries.value}${search.value && `&search=${search.value}`}`,
+    `?${`page=${page.value}`}&${`limit=${limit.value}`}${queries.value && `&${queries.value}`}${search.value && `&search=${search.value}`}`,
   {
     pick: ['data'],
     watch: [page, limit, search, queries, sort],
@@ -323,10 +333,3 @@ const { data, refresh, pending } = await useAPI<Data<GetData<Teacher>, Error>>(
   }
 )
 </script>
-
-<style>
-em {
-  color: #f87171;
-  font-style: normal;
-}
-</style>

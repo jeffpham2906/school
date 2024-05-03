@@ -3,7 +3,10 @@
     <slot />
     <template #panel>
       <div class="px-3 py-3 text-sm space-y-2">
-        <UTabs :items="tabs">
+        <UTabs
+          :items="tabs"
+          :default-index="filterActivedName !== 'default' ? 1 : 0"
+        >
           <template #default="{ item }"> {{ $t(item.label) }}</template>
           <template #item="{ item }">
             <UCard
@@ -25,7 +28,11 @@
               />
 
               <template #footer>
-                <UButton size="xs" variant="ghost" @click="onClearFilter">
+                <UButton
+                  size="xs"
+                  variant="ghost"
+                  @click="emit('onClearFilter')"
+                >
                   {{ $t('clear') }}
                 </UButton>
                 <UButton size="xs" @click="emit('applyFilter', 'default')">
@@ -78,15 +85,12 @@ const emit = defineEmits<{
   createFilterMode: [filterMode: FilterMode]
   deleteFilterMode: [nameFilterMode: string]
   updateFilterMode: [filterMode: FilterMode, staleValue: string]
+  onClearFilter: []
 }>()
 const tabs = [{ label: 'Filter' }, { label: 'list_save_filters' }]
-const onClearFilter = () => {
-  selectedFilters.value.gender = []
-  selectedFilters.value.type = []
-  selectedFilters.value.status = []
-}
+
 const handleClearFilterMode = () => {
   filterActivedName.value = 'default'
-  onClearFilter()
+  emit('onClearFilter')
 }
 </script>
