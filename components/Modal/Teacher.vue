@@ -357,7 +357,7 @@ onMounted(async () => {
     await execute().finally(() => modal.close())
     if (data.value) {
       teacher.value = data.value?.data.record
-      initState = { ...teacher.value }
+      initState = { ...toRaw(teacher.value) }
     } else if (!data.value && error.value) {
       toast.add({ title: 'Something went wrong' })
     }
@@ -404,6 +404,8 @@ const onSubmit = async (event: FormSubmitEvent<Teacher>) => {
     err = error.value?.data
   } else if (isChange.value) {
     const data = getDiffObject(initState, event.data) as Teacher
+    console.log(initState)
+    console.log(event.data)
     data.email = teacher.value.email
     data.phone = teacher.value.phone
     const { error } = await updateTeacher(data).finally(() => {
