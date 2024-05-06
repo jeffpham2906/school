@@ -63,7 +63,7 @@
   "createdBy": "Created By",
   "createdAt": "Created At",
   "updatedAt": "Updated At",
-  "list_save_filters": "List Filter Saved",
+  "list_save_filters": "Filter Saved",
   "listFields": "List Fields",
   "fields": "Fields",
   "information": "Information",
@@ -75,7 +75,8 @@
   "bulk_button": "Bulk",
   "manage_columns": "Manage columns",
   "auto_gen": "Auto generate",
-  "view_mode": "View Mode",
+  "View_mode": "View Mode",
+  "view_mode": "view Mode",
   "view_mode_name": "View mode name",
   "create_view_mode_field": "Create view mode field",
   "update_view_mode_field": "Update view mode field",
@@ -102,5 +103,9 @@
   "welcome": "Welcome",
   "field_required": "Please enter this field",
   "min_6": "At least 6 character",
-  "empty": "Nothing here"
+  "empty": "Nothing here",
+  "sort": "Sort",
+  "created_at_desc": "Sort by created time desc",
+  "created_at_asc": "Sort by created time asc",
+  "update_many": "Update many"
 }

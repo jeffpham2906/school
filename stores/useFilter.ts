@@ -88,7 +88,7 @@ export const useFilter = defineStore('filters', () => {
     filterActived.value = 'default'
     query.value = parseFilterObjectToString(selectedFilters)
     labelFilterArr.value = setLabelFilterArr(selectedFilters)
-    navigateTo({ query: { ...selectedFilters } })
+    navigateTo({ query: { ...toRaw(selectedFilters), page: 1 } })
   }
 
   const createFilterMode = (filterMode: FilterMode) => {

@@ -21,7 +21,7 @@
       @on-refuse="deleteTeacherInfo = { ...initDeleteTeacherInfor }"
     >
       {{ `${$t('confirm_delete')} ${$t('teacher')} ` }}
-      <span class="text-red-600">{{ deleteTeacherInfo.name }}</span>
+      <span class="text-[#f87171]">{{ deleteTeacherInfo.name }}</span>
       ?
     </PopupConfirm>
     <ModalTeacher
@@ -40,8 +40,9 @@
           <UButton
             :label="$t('bulk_button')"
             icon="i-heroicons-circle-stack"
-            variant="ghost"
+            :variant="rowsSelected.length === 0 ? 'ghost' : 'soft'"
             color="gray"
+            :disabled="rowsSelected.length === 0"
           />
           <template #item="{ item }">
             <UButton
@@ -49,9 +50,10 @@
               trailing
               variant="ghost"
               @click="useToast().add({ title: 'Chưa cài' })"
+              size="xs"
+              icon="i-heroicons-trash"
             >
-              <span> {{ $t(item.label) }}</span>
-              <UIcon name="i-heroicons-trash" class="h-4 w-4" />
+              <span class="text-left"> {{ $t(item.label) }}</span>
             </UButton>
           </template>
         </UDropdown>
@@ -64,48 +66,62 @@
       </div>
     </div>
     <div class="flex justify-between px-4">
-      <FilterDropView
-        :items="filterStore.allFilters"
-        v-model:selectedFilters="filterStore.selectedFilters"
-        v-model:listFilterSaved="filterStore.listFilterSaved"
-        v-model:filter-actived-name="filterStore.filterActived"
-        @apply-filter="filterStore.applyFilters"
-        @create-filter-mode="filterStore.createFilterMode"
-        @update-filter-mode="filterStore.updateFilterMode"
-        @delete-filter-mode="filterStore.deleteFilterMode"
-        @on-clear-filter="filterStore.onClearFilter"
-      >
-        <UButton icon="i-heroicons-funnel" size="xs" variant="soft">
-          <span v-if="filterStore.labelFilterArr.length <= 0">
-            {{ $t('Filter') }}
-          </span>
-          <span v-else> {{ $t('filter_by') }}: </span>
-          <span
-            v-for="(label, index) in filterStore.labelFilterArr"
-            :key="label"
-          >
-            <span>{{ $t(label) }}</span>
-            <span v-if="index + 1 !== filterStore.labelFilterArr.length">
-              ,
-            </span>
-          </span>
-        </UButton>
-      </FilterDropView>
-      <DropColumnView
-        :all-fields="fieldStore.allFields"
-        :view-mode-options="fieldStore.viewModeOptions"
-        v-model:viewMode="fieldStore.viewModeSelected"
-        v-model:selectedFields="fieldStore.selectedFields"
-        @create-view-mode="(e) => fieldStore.createViewMode(e)"
-        @delete-view-mode="(e) => fieldStore.deleteViewMode(e)"
-        @update-view-mode="
-          (staleLabel, data) => fieldStore.updateViewMode(staleLabel, data)
-        "
+      <USelectMenu
+        v-model="sort"
+        :options="sortOptions"
+        class="min-w-40 max-w-fit"
       >
         <UButton icon="i-heroicons-view-columns" size="xs" variant="soft">
-          {{ $t('manage_columns') }}
+          {{ $t('sort') }}
         </UButton>
-      </DropColumnView>
+        <template #option="{ option }">
+          <span class="text-sm">{{ $t(option.label) }}</span>
+        </template>
+      </USelectMenu>
+      <div class="flex gap-2">
+        <FilterDropView
+          :items="filterStore.allFilters"
+          v-model:selectedFilters="filterStore.selectedFilters"
+          v-model:listFilterSaved="filterStore.listFilterSaved"
+          v-model:filter-actived-name="filterStore.filterActived"
+          @apply-filter="filterStore.applyFilters"
+          @create-filter-mode="filterStore.createFilterMode"
+          @update-filter-mode="filterStore.updateFilterMode"
+          @delete-filter-mode="filterStore.deleteFilterMode"
+          @on-clear-filter="filterStore.onClearFilter"
+        >
+          <UButton icon="i-heroicons-funnel" size="xs" variant="soft">
+            <span v-if="filterStore.labelFilterArr.length <= 0">
+              {{ $t('Filter') }}
+            </span>
+            <span v-else> {{ $t('filter_by') }}: </span>
+            <span
+              v-for="(label, index) in filterStore.labelFilterArr"
+              :key="label"
+            >
+              <span>{{ $t(label) }}</span>
+              <span v-if="index + 1 !== filterStore.labelFilterArr.length">
+                ,
+              </span>
+            </span>
+          </UButton>
+        </FilterDropView>
+        <DropColumnView
+          :all-fields="fieldStore.allFields"
+          :view-mode-options="fieldStore.viewModeOptions"
+          v-model:viewMode="fieldStore.viewModeSelected"
+          v-model:selectedFields="fieldStore.selectedFields"
+          @create-view-mode="(e) => fieldStore.createViewMode(e)"
+          @delete-view-mode="(e) => fieldStore.deleteViewMode(e)"
+          @update-view-mode="
+            (staleLabel, data) => fieldStore.updateViewMode(staleLabel, data)
+          "
+        >
+          <UButton icon="i-heroicons-view-columns" size="xs" variant="soft">
+            {{ $t('manage_columns') }}
+          </UButton>
+        </DropColumnView>
+      </div>
     </div>
 
     <UTable
@@ -164,11 +180,11 @@
           <div v-if="field.key === 'name'" class="flex items-center gap-2">
             <UAvatar :src="teacher?.avatar?.url" icon="i-heroicons-user" />
             <span
-              :class="[
-                teacher.slug.includes(stringToSlug(search)) && 'text-[#f87171]',
-              ]"
-              >{{ teacher[field.key] }}</span
+              v-if="teacher._highlight"
+              v-html="teacher['_highlight'].name[0]"
             >
+            </span>
+            <span v-else>{{ teacher[field.key] }}</span>
           </div>
           <span v-else>{{ teacher[field.key] }}</span>
         </div>
@@ -250,6 +266,13 @@ const bulkOptions = [
       icon: 'i-heroicons-trash',
     },
   ],
+  [
+    {
+      label: 'update_many',
+      click: () => console.log('delete'),
+      icon: 'i-heroicons-trash',
+    },
+  ],
 ]
 const route = useRoute()
 
@@ -294,8 +317,23 @@ const handleDeleteTeacher = async () => {
 
 const { page, limit } = usePagination()
 
-const sort = ref<Sort>({ column: 'createdAt', direction: 'desc' })
-
+const sortOptions = [
+  { column: 'createdAt', direction: 'desc', label: 'created_at_desc' },
+  { column: 'createdAt', direction: 'asc', label: 'created_at_asc' },
+]
+const sort = ref<Sort>(sortOptions[0])
+watch(sort, (newObj, oldObj) => {
+  const query = {
+    ...route.query,
+    [`sort[${newObj.column}]`]: newObj.direction,
+  }
+  if (newObj.column !== oldObj.column) {
+    delete query[`sort[${oldObj.column}]`]
+  }
+  navigateTo({
+    query,
+  })
+})
 const dataTable = computed<Teacher[]>(() => data.value?.data.items || [])
 const total = computed(() => data.value?.data.total ?? 0)
 const pageFrom = computed(
@@ -308,12 +346,15 @@ const pageTo = computed(() =>
   )
 )
 const queries = computed(() => filterStore.query)
-watch(queries, () => (page.value = 1))
 const search = ref<string>((route.query.search as string) || '')
 watch(search, () => {
   if (search.value) {
-    navigateTo({ query: { ...route.query, search: search.value } })
-    page.value = 1
+    if (page.value !== 1) {
+      page.value = 1
+      route.query.search = search.value
+    } else {
+      navigateTo({ query: { ...route.query, search: search.value } })
+    }
   } else {
     const queryObj = { ...route.query }
     delete queryObj['search']
@@ -325,7 +366,7 @@ watch(search, () => {
 const { data, refresh, pending } = await useAPI<Data<GetData<Teacher>, Error>>(
   () =>
     '/teachers' +
-    `?${`page=${page.value}`}&${`limit=${limit.value}`}${queries.value && `&${queries.value}`}${search.value && `&search=${search.value}`}`,
+    `?${`page=${page.value}`}&${`limit=${limit.value}`}&${`sort[${sort.value.column}]=${sort.value.direction}`}${queries.value && `&${queries.value}`}${search.value && `&search=${search.value}`}`,
   {
     pick: ['data'],
     watch: [page, limit, search, queries, sort],
@@ -333,3 +374,9 @@ const { data, refresh, pending } = await useAPI<Data<GetData<Teacher>, Error>>(
   }
 )
 </script>
+<style>
+em {
+  color: #f87171;
+  font-style: normal;
+}
+</style>

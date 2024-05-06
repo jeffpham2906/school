@@ -75,7 +75,8 @@
   "bulk_button": "Xử lý hàng loạt",
   "manage_columns": "Quản lý cột dữ liệu",
   "auto_gen": "Tự động tạo",
-  "view_mode": "Chế độ xem",
+  "View_mode": "Chế độ xem",
+  "view_mode": "chế độ xem",
   "view_mode_name": "Tên chế độ xem",
   "create_view_mode_field": "Tạo chế độ xem trường dữ liệu",
   "update_view_mode_field": "Cập nhật chế độ xem",
@@ -102,5 +103,9 @@
   "welcome": "Đăng nhập",
   "field_required": "Vui lòng nhập trường này",
   "min_6": "Tối thiểu 6 ký tự",
-  "empty": "Không có gì"
+  "empty": "Không có gì",
+  "sort": "Sắp xếp",
+  "created_at_desc": "Thời gian tạo mới nhất",
+  "created_at_asc": "Thời gian tạo cũ nhất",
+  "update_many": "Cập nhật hàng loạt"
 }

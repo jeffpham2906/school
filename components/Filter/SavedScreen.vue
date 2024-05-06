@@ -11,7 +11,6 @@
   />
   <PopupConfirm
     v-model="isPopupConfirmOpen"
-    :message="`${$t('confirm_delete')} ${$t('filter')} ${nameDeleted}`"
     @on-accept="
       () => {
         emit('deleteFilterMode', nameDeleted)
@@ -19,7 +18,11 @@
       }
     "
     @on-refuse="nameDeleted = ''"
-  />
+  >
+    <span>{{ `${$t('confirm_delete')} ${$t('filter')} ` }}</span>
+    <span class="text-[#f87171]">{{ nameDeleted }}</span>
+    ?
+  </PopupConfirm>
   <UCard
     :ui="{
       header: {

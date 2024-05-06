@@ -16,7 +16,7 @@
 
         <div class="space-y-1">
           <div class="flex items-center justify-between mb-1">
-            <span>{{ $t('view_mode') }}</span>
+            <span>{{ $t('View_mode') }}</span>
             <UButton
               size="2xs"
               icon="i-heroicons-plus"
@@ -47,9 +47,14 @@
                 />
                 <PopupConfirm
                   v-model="deleteConfirmPopup"
-                  :message="`${$t('confirm_delete')} ${$t('view_mode')} ${option.label}`"
                   @on-accept="emit('deleteViewMode', option.value)"
-                />
+                >
+                  <span>
+                    {{ `${$t('confirm_delete')} ${$t('view_mode')} ` }}
+                  </span>
+                  <span class="text-[#f87171]">{{ option.label }}</span>
+                  ?
+                </PopupConfirm>
                 <UButton
                   @click="() => (deleteConfirmPopup = true)"
                   icon="i-heroicons-trash"

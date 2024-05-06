@@ -1,16 +1,15 @@
 export const usePagination = () => {
   const route = useRoute()
   const page = ref(Number(route.query.page) || 1)
-  watch(page, () => {
-    if (page.value === 1) {
-      const queryObj = { ...route.query }
-      delete queryObj['page']
-      navigateTo({ query: queryObj })
-    } else {
-      navigateTo({ query: { ...route.query, page: page.value } })
+  watch(page, () => navigateTo({ query: { ...route.query, page: page.value } }))
+  watch(
+    () => route.query.page,
+    () => {
+      if (route.query.page) {
+        page.value = +route.query.page
+      }
     }
-  })
-
+  )
   const limit = ref(Number(route.query.limit) || 10)
   watch(limit, () => {
     if (limit.value === 10) {
